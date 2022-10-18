@@ -1,7 +1,7 @@
 import CSS from "csstype";
 import H from "history";
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate, useLocation, NavigateFunction } from "react-router";
 import { Link as RouterLink, LinkProps } from "react-router-dom";
 import {
     Button, Card, CardActionArea, CardMedia, CardContent,
@@ -37,7 +37,7 @@ const Images: React.FC = () => {
     const last = useRef<string>();
     const [images, setImages] = useState<ImageResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const loadImages = (history: H.History, location: H.Location, images: ImageResponse[]) => {
+    const loadImages = (history: NavigateFunction, location: H.Location, images: ImageResponse[]) => {
         const params = new URLSearchParams(location.search);
         params.set("count", "100");
         if (last.current) {
@@ -49,7 +49,7 @@ const Images: React.FC = () => {
                 return res.json();
             }
             if (res.status === 401) {
-                history.push("/");
+                history("/");
                 return;
             }
             throw new Error(res.statusText);

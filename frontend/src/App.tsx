@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { BrowserRouter, Link as RouterLink, LinkProps, Route } from "react-router-dom";
+import { BrowserRouter, Link as RouterLink, LinkProps, Route ,Routes } from "react-router-dom";
 import {
     AppBar, Button, Container, Link, Toolbar, Typography,
     makeStyles, createStyles,
@@ -74,10 +74,12 @@ const App: React.FC = () => {
           </Toolbar>
         </AppBar>
         <Container fixed>
-          <Route path="/" element={email ? <Menu /> :<Signin />}></Route>
-          <Route path="/image/:id" element={<Image />}></Route>
-          <Route path="/images" element={<Images />}></Route>
-          <Route path="/stats" element={<Stats />}></Route>
+          <Routes>
+            <Route path="/" element={email ? <Menu /> :<Signin />}></Route>
+            <Route path="/image/:id" element={<Image />}></Route>
+            <Route path="/images" element={<Images />}></Route>
+            <Route path="/stats" element={<Stats />}></Route>
+          </Routes>
         </Container>
       </BrowserRouter>
     );
