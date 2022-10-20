@@ -22,7 +22,6 @@ type App struct {
 	firebase   *firebase.App
 	fsClient   *firestore.Client
 	session    sessions.Store
-	adminToken string
 }
 
 // NewApp function
@@ -45,7 +44,6 @@ func NewApp(projectID string) (*App, error) {
 		firebase:   fbApp,
 		fsClient:   fsClient,
 		session:    sessions.NewCookieStore(sessionKey),
-		adminToken: os.Getenv("ADMIN_TOKEN"),
 	}, nil
 }
 

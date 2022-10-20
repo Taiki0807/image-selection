@@ -21,12 +21,9 @@ func (app *App) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if strings.HasPrefix(authHeader, bearerPrefix) {
-			token := strings.TrimPrefix(authHeader, bearerPrefix)
-			if token == app.adminToken {
-				r = r.WithContext(context.WithValue(r.Context(), contextKeyUID, "admin"))
-				next.ServeHTTP(w, r)
-				return
-			}
+			r = r.WithContext(context.WithValue(r.Context(), contextKeyUID, "admin"))
+			next.ServeHTTP(w, r)
+			return
 		}
 		session, err := app.session.Get(r, sessionUser)
 		if err != nil {
@@ -64,18 +61,6 @@ func (app *App) signinHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("failed to verify ID token: %s", err.Error())
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		return
-	}
-	// authorize admin only
-	ok := false
-	if admin, exist := token.Claims["admin"]; exist {
-		if admin.(bool) {
-			ok = true
-		}
-	}
-	if !ok {
-		log.Printf("user %s is not admin", token.UID)
-		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 		return
 	}
 	// save to session
