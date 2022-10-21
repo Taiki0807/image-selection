@@ -77,7 +77,7 @@ const Signin: React.FC = () => {
                 } else {
                     throw new Error(res.statusText);
                 }
-            } catch (err) {
+            } catch (err:any) {
                 alert(err.message);
             } finally {
                 setSubmitting(false);
