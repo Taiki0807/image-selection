@@ -4,9 +4,19 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation, NavigateFunction } from "react-router";
 import { Link as RouterLink, LinkProps } from "react-router-dom";
 import {
-    Button, Card, CardActionArea, CardMedia, CardContent,
-    Box, CircularProgress, Grid, Link, Typography,
-    Theme, makeStyles, createStyles,
+    Button,
+    Card,
+    CardActionArea,
+    CardMedia,
+    CardContent,
+    Box,
+    CircularProgress,
+    Grid,
+    Link,
+    Typography,
+    Theme,
+    makeStyles,
+    createStyles,
 } from "@material-ui/core";
 
 import SearchBox from "./SearchBox";
@@ -37,36 +47,50 @@ const Images: React.FC = () => {
     const last = useRef<string>();
     const [images, setImages] = useState<ImageResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const loadImages = (history: NavigateFunction, location: H.Location, images: ImageResponse[]) => {
+    const loadImages = (
+        history: NavigateFunction,
+        location: H.Location,
+        images: ImageResponse[]
+    ) => {
         const params = new URLSearchParams(location.search);
         params.set("count", "100");
         if (last.current) {
             params.set("id", last.current);
         }
         setLoading(true);
-        fetch(`/api/images?${params}`).then((res: Response) => {
-            if (res.ok) {
-                return res.json();
-            }
-            if (res.status === 401) {
-                history("/");
-                return;
-            }
-            throw new Error(res.statusText);
-        }).then((data: ImageResponse[]) => {
-            if (data.length === 0) {
-                return;
-            }
-            last.current = data[data.length - 1].id;
-            const ids = new Set(images.map((value: ImageResponse) => value.id));
-            setImages(images.concat(data.filter((value: ImageResponse) => {
-                return !ids.has(value.id);
-            })));
-        }).catch((err: Error) => {
-            window.console.error(err.message);
-        }).finally(() => {
-            setLoading(false);
-        });
+        fetch(`/api/images?${params}`)
+            .then((res: Response) => {
+                if (res.ok) {
+                    return res.json();
+                }
+                if (res.status === 401) {
+                    history("/");
+                    return;
+                }
+                throw new Error(res.statusText);
+            })
+            .then((data: ImageResponse[]) => {
+                if (data.length === 0) {
+                    return;
+                }
+                last.current = data[data.length - 1].id;
+                const ids = new Set(
+                    images.map((value: ImageResponse) => value.id)
+                );
+                setImages(
+                    images.concat(
+                        data.filter((value: ImageResponse) => {
+                            return !ids.has(value.id);
+                        })
+                    )
+                );
+            })
+            .catch((err: Error) => {
+                window.console.error(err.message);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     };
     useEffect(() => {
         if (location.search.length === 0) {
@@ -92,10 +116,8 @@ const Images: React.FC = () => {
                     pathname: `/image/${image.id}`,
                     search: location.search,
                 };
-                return (
-                    <RouterLink ref={ref} to={to} {...props} />
-                );
-            },
+                return <RouterLink ref={ref} to={to} {...props} />;
+            }
         );
         const style: CSS.Properties = {
             borderStyle: "solid",
@@ -103,36 +125,37 @@ const Images: React.FC = () => {
             borderColor: "transparent",
         };
         switch (image.status) {
-        case 1:
-            style.borderColor = "lightcoral";
-            break;
-        case 2:
-            style.borderColor = "gray";
-            break;
-        case 3:
-            style.borderColor = "lightgreen";
-            break;
+            case 1:
+                style.borderColor = "lightcoral";
+                break;
+            case 2:
+                style.borderColor = "gray";
+                break;
+            case 3:
+                style.borderColor = "lightgreen";
+                break;
         }
         return (
-        <Box key={image.id} m={0.2}>
-            <Card className={classes.card} style={style}>
-                <Link component={link}>
-                    <CardActionArea>
-                    <CardMedia
-                        className={classes.media}
-                        image={image.image_url} />
-                    </CardActionArea>
-                </Link>
-                <CardContent className={classes.cardContent}>
-                    <Typography variant="body2">
-                    {image.size}×{image.size}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                    {image.label_name}
-                    </Typography>
-                </CardContent>
-            </Card>
-        </Box>
+            <Box key={image.id} m={0.2}>
+                <Card className={classes.card} style={style}>
+                    <Link component={link}>
+                        <CardActionArea>
+                            <CardMedia
+                                className={classes.media}
+                                image={image.image_url}
+                            />
+                        </CardActionArea>
+                    </Link>
+                    <CardContent className={classes.cardContent}>
+                        <Typography variant="body2">
+                            {image.size}×{image.size}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                            {image.label_name}
+                        </Typography>
+                    </CardContent>
+                </Card>
+            </Box>
         );
     });
     const progress = (
@@ -141,18 +164,29 @@ const Images: React.FC = () => {
         </Grid>
     );
     return (
-    <React.Fragment>
-        <h2>Images</h2>
-        <SearchBox />
-        <Box display="flex" flexWrap="wrap" mt={2}>
-        {cards}
-        </Box>
-        {loading ? progress :<Grid container justify="center">
-        <Box mt={2}>
-            <Button color="inherit" onClick={() => loadImages(history, location, images)}>More</Button>
-        </Box>
-        </Grid>}
-    </React.Fragment>
+        <React.Fragment>
+            <h2>Images</h2>
+            <SearchBox />
+            <Box display="flex" flexWrap="wrap" mt={2}>
+                {cards}
+            </Box>
+            {loading ? (
+                progress
+            ) : (
+                <Grid container justify="center">
+                    <Box mt={2}>
+                        <Button
+                            color="inherit"
+                            onClick={() =>
+                                loadImages(history, location, images)
+                            }
+                        >
+                            More
+                        </Button>
+                    </Box>
+                </Grid>
+            )}
+        </React.Fragment>
     );
 };
 

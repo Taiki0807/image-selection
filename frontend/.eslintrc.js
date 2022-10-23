@@ -33,7 +33,7 @@ module.exports = {
                 allow: ["warn", "error"],
             },
         ],
-        indent: ["error", 4],
+        indent: ["error", 4, { SwitchCase: 1 }],
         "import/prefer-default-export": "off",
         "react/react-in-jsx-scope": "off",
         "react/jsx-filename-extension": [
