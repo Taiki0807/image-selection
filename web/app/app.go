@@ -22,6 +22,7 @@ type App struct {
 	firebase   *firebase.App
 	fsClient   *firestore.Client
 	session    sessions.Store
+	adminToken string
 }
 
 // NewApp function
@@ -44,21 +45,18 @@ func NewApp(projectID string) (*App, error) {
 		firebase:   fbApp,
 		fsClient:   fsClient,
 		session:    sessions.NewCookieStore(sessionKey),
+		adminToken: os.Getenv("ADMIN_TOKEN"),
 	}, nil
 }
 
 // Handler method
 func (app *App) Handler() http.Handler {
 	router := mux.NewRouter()
-	router.HandleFunc("/api/signin", app.signinHandler).Methods("POST")
-	router.HandleFunc("/api/signout", app.signoutHandler).Methods("POST")
 
 	api := router.PathPrefix("/api").Subrouter()
 	api.HandleFunc("/images", app.imagesHandler).Methods("GET")
 	api.HandleFunc("/image/{id}", app.updateImageHandler).Methods("PUT")
 	api.HandleFunc("/stats", app.statsHandler).Methods("GET")
-	api.HandleFunc("/userinfo", app.userinfoHandler).Methods("GET")
-	api.Use(app.authMiddleware)
 
 	// wildcard endpoints
 	router.PathPrefix("/").HandlerFunc(app.appHandler)
