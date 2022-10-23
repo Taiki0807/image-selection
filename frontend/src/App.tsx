@@ -12,7 +12,7 @@ import { AuthProvider } from "./context/AuthContext";
 
 const App: React.FC = () => {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/matching_app">
             <AuthProvider>
                 <Header />
                 <Container fixed>
