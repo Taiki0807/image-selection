@@ -102,7 +102,7 @@ const InfoTable: React.FC<ImageResponse> = (image: ImageResponse) => {
 
 const Canvas: React.FC<{ size: number, image: ImageResponse | undefined }> = ({ size, image }) => {
     const canvas = useRef<HTMLCanvasElement>(null);
-    if (image && canvas.current) {
+    if ((image != null) && (canvas.current != null)) {
         const ctx = canvas.current.getContext("2d")!;
         const img = new Image();
         img.onload = () => {
@@ -164,9 +164,9 @@ const ImageViewer: React.FC = () => {
     const handlers = {
         NEXT_IMAGE: nextImage,
         PREV_IMAGE: prevImage,
-        STATUS_1: () => updateStatus(1),
-        STATUS_2: () => updateStatus(2),
-        STATUS_3: () => updateStatus(3),
+        STATUS_1: async () => await updateStatus(1),
+        STATUS_2: async () => await updateStatus(2),
+        STATUS_3: async () => await updateStatus(3),
     };
     const current = images.find((element: ImageResponse) => element.id === params.id);
     const updateStatus = async (status: number) => {
@@ -175,7 +175,7 @@ const ImageViewer: React.FC = () => {
             body: JSON.stringify({ status }),
         });
         if (res.ok) {
-            if (current) {
+            if (current != null) {
                 current.status = status;
                 current.updated_at = Math.floor(new Date().getTime() / 1000);
             }
@@ -200,9 +200,9 @@ const ImageViewer: React.FC = () => {
                 if (reverse) {
                     images.reverse();
                 }
-                return Promise.resolve(images);
+                return await Promise.resolve(images);
             } else {
-                return Promise.reject(res.status);
+                return await Promise.reject(res.status);
             }
         };
         const requests: [Promise<ImageResponse[]>, Promise<ImageResponse[]>] = [
@@ -290,14 +290,14 @@ const ImageViewer: React.FC = () => {
                 </Button>
               </Box>
               <Box>
-                <ToggleButtonGroup exclusive size="small" value={current && current.status}>
-                  <ToggleButton value={1} onClick={() => updateStatus(1)}>
+                <ToggleButtonGroup exclusive size="small" value={(current != null) && current.status}>
+                  <ToggleButton value={1} onClick={async () => await updateStatus(1)}>
                     <Box mx={1}>NG</Box>
                   </ToggleButton>
-                  <ToggleButton value={2} onClick={() => updateStatus(2)}>
+                  <ToggleButton value={2} onClick={async () => await updateStatus(2)}>
                     <Box mx={1}>Pending</Box>
                   </ToggleButton>
-                  <ToggleButton value={3} onClick={() => updateStatus(3)}>
+                  <ToggleButton value={3} onClick={async () => await updateStatus(3)}>
                     <Box mx={1}>OK</Box>
                   </ToggleButton>
                 </ToggleButtonGroup>
@@ -310,7 +310,7 @@ const ImageViewer: React.FC = () => {
             </Grid>
           </Grid>
           <Grid item xs={12} lg={6}>
-            {current && <InfoTable {...current} />}
+            {(current != null) && <InfoTable {...current} />}
           </Grid>
         </Grid>
         <GlobalHotKeys keyMap={keyMap} handlers={handlers} allowChanges={true} />

@@ -7,11 +7,11 @@ import {
 const Stats: React.FC = () => {
     const [counts, setCounts] = useState([]);
     useEffect(() => {
-        fetch("/api/stats").then((res: Response) => {
+        fetch("/api/stats").then(async (res: Response) => {
             if (!res.ok) {
                 throw new Error(res.statusText);
             }
-            return res.json();
+            return await res.json();
         }).then((results) => {
             setCounts(results);
         }).catch((err: Error) => {
@@ -21,12 +21,12 @@ const Stats: React.FC = () => {
     const rows = counts.map((v: any, index: number) => {
         return (
           <TableRow key={index}>
-            <TableCell component="th" scope="row">Size {v["size"]}</TableCell>
-            <TableCell>{v["status_ready"]}</TableCell>
-            <TableCell>{v["status_ng"]}</TableCell>
-            <TableCell>{v["status_pending"]}</TableCell>
-            <TableCell>{v["status_ok"]}</TableCell>
-            <TableCell>{v["status_predicted"]}</TableCell>
+            <TableCell component="th" scope="row">Size {v.size}</TableCell>
+            <TableCell>{v.status_ready}</TableCell>
+            <TableCell>{v.status_ng}</TableCell>
+            <TableCell>{v.status_pending}</TableCell>
+            <TableCell>{v.status_ok}</TableCell>
+            <TableCell>{v.status_predicted}</TableCell>
           </TableRow>
         );
     });
