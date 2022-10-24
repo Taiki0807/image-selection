@@ -5,7 +5,7 @@ import BottomNavigationAction from "@material-ui/core/BottomNavigationAction";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import ChatIcon from "@material-ui/icons/Chat";
 import PeopleAltIcon from "@material-ui/icons/PeopleAlt";
-import { GoogleMap, LoadScript } from "@react-google-maps/api";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 
 const useStyles = makeStyles({
     root: {
@@ -26,9 +26,13 @@ const containerStyle = {
     height: "100%",
 };
 
+const positionAkiba = {
+    lat: 35.69731,
+    lng: 139.7747,
+};
 const center = {
-    lat: 35.69575,
-    lng: 139.77521,
+    lat: 35.69731,
+    lng: 139.7747,
 };
 
 const Map: React.FC = () => {
@@ -36,14 +40,14 @@ const Map: React.FC = () => {
     const [value, setValue] = useState(0);
     return (
         <div className={classes.root}>
-            <LoadScript
-                googleMapsApiKey={process.env.REACT_APP_googleMapsApiKey!}
-            >
+            <LoadScript googleMapsApiKey="AIzaSyAS8lqTPsqxrmd9MqwDTsdybceRZ7yLbrM">
                 <GoogleMap
                     mapContainerStyle={containerStyle}
                     center={center}
                     zoom={17}
-                ></GoogleMap>
+                >
+                    <Marker position={positionAkiba} />
+                </GoogleMap>
             </LoadScript>
             <BottomNavigation
                 value={value}
