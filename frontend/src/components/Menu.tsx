@@ -1,6 +1,6 @@
 import React from "react";
 import { Link as RouterLink, LinkProps } from "react-router-dom";
-import { Link, List, ListItem } from "@material-ui/core";
+import { Link, List, ListItem, Container } from "@material-ui/core";
 
 const Menu: React.FC = () => {
     const link = React.forwardRef<HTMLAnchorElement, LinkProps>(
@@ -9,7 +9,7 @@ const Menu: React.FC = () => {
         }
     );
     return (
-        <div>
+        <Container fixed>
             <List>
                 <ListItem>
                     <Link component={link} to="/images">
@@ -21,8 +21,13 @@ const Menu: React.FC = () => {
                         Stats
                     </Link>
                 </ListItem>
+                <ListItem>
+                    <Link component={link} to="/map">
+                        map
+                    </Link>
+                </ListItem>
             </List>
-        </div>
+        </Container>
     );
 };
 
