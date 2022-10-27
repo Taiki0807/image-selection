@@ -51,6 +51,10 @@ module.exports = {
         "@typescript-eslint/strict-boolean-expressions": "off",
         "@typescript-eslint/prefer-optional-chain": "off",
         "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "react/jsx-key": "off",
         "@typescript-eslint/triple-slash-reference": [
             "error",
             {
