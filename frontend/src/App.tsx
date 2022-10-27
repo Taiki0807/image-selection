@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import "./styles.css";
 
 import Signin from "./components/Signin";
 import Menu from "./components/Menu";
@@ -8,7 +9,7 @@ import Images from "./components/Images";
 import Stats from "./components/Stats";
 import Header from "./components/Header";
 import { AuthProvider } from "./context/AuthContext";
-import Map from "./components/Map";
+import Map from "./components/Mappage";
 
 const App: React.FC = () => {
     return (

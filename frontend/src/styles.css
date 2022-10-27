@@ -1,0 +1,25 @@
+.marker-pin {
+    width: 44px;
+    height: 44px;
+    border-radius: 50% 50% 50% 0;
+    background: #a2ff7e;
+    position: absolute;
+    transform: rotate(-45deg);
+    left: 50%;
+    top: 50%;
+    margin: -15px 0 0 -15px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    overflow: hidden;
+}
+
+.marker-pin img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    position: relative;
+    transform: rotate(45deg);
+    left: 2px;
+    top: 2px;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}

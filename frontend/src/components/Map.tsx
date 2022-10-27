@@ -1,73 +1,48 @@
 import React, { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import BottomNavigation from "@material-ui/core/BottomNavigation";
-import BottomNavigationAction from "@material-ui/core/BottomNavigationAction";
-import FavoriteIcon from "@material-ui/icons/Favorite";
-import ChatIcon from "@material-ui/icons/Chat";
-import PeopleAltIcon from "@material-ui/icons/PeopleAlt";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { TileLayer, Marker, MapContainer } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
-const useStyles = makeStyles({
-    root: {
-        height: "93.4vh",
-        backgroundColor: "#cfe8fc",
-    },
-    item: {
-        height: "100px",
-        background: "#f0f8ff",
-        position: "fixed",
-        bottom: "0",
-        width: "100%",
-    },
-});
+import Datos from "./Datos";
 
-const containerStyle = {
-    width: "100%",
-    height: "100%",
-};
+const Map = () => {
+    const [item, setItem] = useState(Datos);
 
-const positionAkiba = {
-    lat: 35.69731,
-    lng: 139.7747,
-};
-const center = {
-    lat: 35.69731,
-    lng: 139.7747,
-};
-
-const Map: React.FC = () => {
-    const classes = useStyles();
-    const [value, setValue] = useState(0);
+    const defaultCenter: any = [-12.069475, -77.022161];
+    const defaultZoom = 8;
     return (
-        <div className={classes.root}>
-            <LoadScript googleMapsApiKey="AIzaSyAS8lqTPsqxrmd9MqwDTsdybceRZ7yLbrM">
-                <GoogleMap
-                    mapContainerStyle={containerStyle}
-                    center={center}
-                    zoom={17}
-                >
-                    <Marker position={positionAkiba} />
-                </GoogleMap>
-            </LoadScript>
-            <BottomNavigation
-                value={value}
-                onChange={(event, newValue) => {
-                    setValue(newValue);
-                }}
-                showLabels
-                className={classes.item}
-            >
-                <BottomNavigationAction label="Chat" icon={<ChatIcon />} />
-                <BottomNavigationAction
-                    label="Favorites"
-                    icon={<FavoriteIcon />}
-                />
-                <BottomNavigationAction
-                    label="People"
-                    icon={<PeopleAltIcon />}
-                />
-            </BottomNavigation>
-        </div>
+        <MapContainer
+            center={defaultCenter}
+            zoom={defaultZoom}
+            style={{
+                height: "90%",
+                width: "100%",
+            }}
+        >
+            <TileLayer
+                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {item.map(({ lat, lng, IdUbigeo, img, Departamento }) => {
+                return (
+                    <Marker
+                        key={IdUbigeo}
+                        position={[lat, lng]}
+                        icon={L.divIcon({
+                            className: "custom-div-icon",
+                            html: `
+                            <div class='marker-pin'>
+                            <img src=${img} />
+                            </div>
+                            </div>
+                            `,
+                            iconSize: [30, 42],
+                            iconAnchor: [20, 50],
+                        })}
+                    ></Marker>
+                );
+            })}
+        </MapContainer>
     );
 };
 
