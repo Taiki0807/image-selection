@@ -10,6 +10,7 @@ import Stats from "./components/Stats";
 import Header from "./components/Header";
 import { AuthProvider } from "./context/AuthContext";
 import Map from "./components/Mappage";
+import Signup from "./components/Signup";
 
 const App: React.FC = () => {
     return (
@@ -23,6 +24,7 @@ const App: React.FC = () => {
                     <Route path="/images" element={<Images />}></Route>
                     <Route path="/stats" element={<Stats />}></Route>
                     <Route path="/map" element={<Map />}></Route>
+                    <Route path="/signup" element={<Signup />}></Route>
                 </Routes>
             </AuthProvider>
         </BrowserRouter>
