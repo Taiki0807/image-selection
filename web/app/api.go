@@ -296,3 +296,18 @@ func (app *App) updateImage(ctx context.Context, id string, status entity.Status
 		return nil
 	})
 }
+
+func (app *App) createUser(w http.ResponseWriter, r *http.Request){
+	type User struct {
+		Name string `json:"name"`
+		Age  int    `json:"age"`
+	}
+	var user User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		log.Printf("failed to encode users: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}else{
+		fmt.Fprintf(w, "%s is %d years old!", user.Name, user.Age)
+	}
+}
