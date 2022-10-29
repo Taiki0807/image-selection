@@ -54,6 +54,8 @@ module.exports = {
         "@typescript-eslint/no-unused-vars": "off",
         "no-unused-vars": "off",
         "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/restrict-plus-operands": "off",
+        "@typescript-eslint/no-floating-promises": "off",
         "react/jsx-key": "off",
         "@typescript-eslint/triple-slash-reference": [
             "error",
