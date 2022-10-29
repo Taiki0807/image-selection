@@ -17,6 +17,7 @@ import {
     Theme,
     makeStyles,
     createStyles,
+    Container,
 } from "@material-ui/core";
 
 import SearchBox from "./SearchBox";
@@ -164,29 +165,31 @@ const Images: React.FC = () => {
         </Grid>
     );
     return (
-        <React.Fragment>
-            <h2>Images</h2>
-            <SearchBox />
-            <Box display="flex" flexWrap="wrap" mt={2}>
-                {cards}
-            </Box>
-            {loading ? (
-                progress
-            ) : (
-                <Grid container justifyContent="center">
-                    <Box mt={2}>
-                        <Button
-                            color="inherit"
-                            onClick={() =>
-                                loadImages(history, location, images)
-                            }
-                        >
-                            More
-                        </Button>
-                    </Box>
-                </Grid>
-            )}
-        </React.Fragment>
+        <Container fixed>
+            <React.Fragment>
+                <h2>Images</h2>
+                <SearchBox />
+                <Box display="flex" flexWrap="wrap" mt={2}>
+                    {cards}
+                </Box>
+                {loading ? (
+                    progress
+                ) : (
+                    <Grid container justifyContent="center">
+                        <Box mt={2}>
+                            <Button
+                                color="inherit"
+                                onClick={() =>
+                                    loadImages(history, location, images)
+                                }
+                            >
+                                More
+                            </Button>
+                        </Box>
+                    </Grid>
+                )}
+            </React.Fragment>
+        </Container>
     );
 };
 

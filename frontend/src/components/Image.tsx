@@ -15,6 +15,7 @@ import {
     TableCell,
     makeStyles,
     useTheme,
+    Container,
 } from "@material-ui/core";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { ToggleButtonGroup, ToggleButton } from "@material-ui/lab";
@@ -352,7 +353,7 @@ const ImageViewer: React.FC = () => {
         }
     );
     return (
-        <div>
+        <Container fixed>
             <Box my={2}>
                 <Breadcrumbs aria-label="breadcrumb">
                     <Link color="inherit" component={link}>
@@ -414,7 +415,7 @@ const ImageViewer: React.FC = () => {
                 handlers={handlers}
                 allowChanges={true}
             />
-        </div>
+        </Container>
     );
 };
 
