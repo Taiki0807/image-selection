@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+opencv-python = "*"
+numpy = "*"
+urllib3 = "*"
+decorator = "*"
+tensorflow = "*"
+mtcnn = "*"
+cmake = "*"
+dlib = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
