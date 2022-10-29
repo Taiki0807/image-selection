@@ -159,7 +159,7 @@ const Images: React.FC = () => {
         );
     });
     const progress = (
-        <Grid container justify="center">
+        <Grid container justifyContent="center">
             <CircularProgress className={classes.progress} />
         </Grid>
     );
@@ -173,7 +173,7 @@ const Images: React.FC = () => {
             {loading ? (
                 progress
             ) : (
-                <Grid container justify="center">
+                <Grid container justifyContent="center">
                     <Box mt={2}>
                         <Button
                             color="inherit"
