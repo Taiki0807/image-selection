@@ -31,7 +31,7 @@ const useStyles = makeStyles(() => {
             marginRight: "20px",
         },
         icon: {
-            background: "#fff",
+            background: "#dcdcdc",
         },
     });
 });
@@ -89,6 +89,23 @@ const Header: React.FC = () => {
         </Button>
     ) : null;
 
+    const icon = isLoggedIn ? (
+        <StyledBadge
+            overlap="circular"
+            anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+            }}
+            variant="dot"
+        >
+            <Avatar
+                className={classes.icon}
+                alt=""
+                src={user?.photoURL as string}
+            />
+        </StyledBadge>
+    ) : null;
+
     const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
         (props, ref) => <RouterLink ref={ref} to="/menu" {...props} />
     );
@@ -103,20 +120,7 @@ const Header: React.FC = () => {
                     </Typography>
                     <div className={classes.contents}>
                         {button}
-                        <StyledBadge
-                            overlap="circular"
-                            anchorOrigin={{
-                                vertical: "bottom",
-                                horizontal: "right",
-                            }}
-                            variant="dot"
-                        >
-                            <Avatar
-                                className={classes.icon}
-                                alt=""
-                                src={user?.photoURL as string}
-                            />
-                        </StyledBadge>
+                        {icon}
                     </div>
                 </Toolbar>
             </AppBar>
