@@ -9,6 +9,7 @@ type Status int
 const (
 	KindNameImage = "Image"
 	KindNameCount = "Count"
+	KindNameUser = "User"
 )
 
 // Status values
