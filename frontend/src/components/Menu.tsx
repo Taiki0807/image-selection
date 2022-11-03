@@ -26,6 +26,11 @@ const Menu: React.FC = () => {
                         map
                     </Link>
                 </ListItem>
+                <ListItem>
+                    <Link component={link} to="/matching/0">
+                        matching
+                    </Link>
+                </ListItem>
             </List>
         </Container>
     );

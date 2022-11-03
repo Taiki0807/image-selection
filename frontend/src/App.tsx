@@ -12,6 +12,7 @@ import { AuthProvider } from "./context/AuthContext";
 import Map from "./components/Mappage";
 import Signup from "./components/Signup";
 import Apitest from "./components/Apitest";
+import Matching from "./components/Matching";
 
 const App: React.FC = () => {
     return (
@@ -21,6 +22,7 @@ const App: React.FC = () => {
                 <Routes>
                     <Route path="/" element={<Signin />}></Route>
                     <Route path="/image/:id" element={<Image />}></Route>
+                    <Route path="/matching/:id" element={<Matching />}></Route>
                     <Route path="/menu" element={<Menu />}></Route>
                     <Route path="/images" element={<Images />}></Route>
                     <Route path="/stats" element={<Stats />}></Route>
