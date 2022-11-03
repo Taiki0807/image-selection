@@ -89,6 +89,15 @@ type Data1 struct {
 }
 
 func (app *App) likeImageHandler(w http.ResponseWriter, r *http.Request) {
+	_,_, err := app.fsClient.Collection("users").Add(r.Context(),map[string]interface{}{
+        "first": "Ada",
+        "last":  "Lovelace",
+        "born":  1815,
+    })
+	if err != nil {
+        log.Fatalf("Failed adding alovelace: %v", err)
+    }
+	log.Printf("likeimage")
 	var data1 = Data1 {
 		ID:"1",
 		Title:"sample1",
