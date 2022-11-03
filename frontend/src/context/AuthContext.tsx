@@ -9,7 +9,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { useNavigate } from "react-router";
 import { app } from "../firebase";
-import { log } from "console";
+import { useLocation } from "react-router-dom";
 
 export type UserType = User | null;
 
@@ -29,10 +29,12 @@ export const useAuthContext = () => {
 
 export const AuthProvider = ({ children }: AuthProps) => {
     const router = useNavigate();
+    const location = useLocation();
     const auth = getAuth(app);
     const [user, setUser] = useState<UserType>(null);
+    console.log(location.pathname);
     const isAvailableForViewing =
-        router.name === "/" || router.name === "/signup";
+        location.pathname === "/" || location.pathname === "/signup";
     const value = {
         user,
     };
@@ -41,8 +43,8 @@ export const AuthProvider = ({ children }: AuthProps) => {
         const authStateChanged = onAuthStateChanged(auth, async (user) => {
             console.log(user);
             setUser(user);
-            console.log(null && !isAvailableForViewing);
-            user == null && isAvailableForViewing && (await router("/"));
+            console.log(isAvailableForViewing);
+            user == null && !isAvailableForViewing && (await router("/"));
         });
         return () => {
             authStateChanged();
