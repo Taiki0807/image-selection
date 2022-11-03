@@ -15,7 +15,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"cloud.google.com/go/storage"
-	"github.com/sugyan/image-dataset/web/entity"
+	"github.com/taiki0807/image-selection/web/entity"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
