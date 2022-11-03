@@ -82,6 +82,29 @@ func (app *App) updateImageHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+type Data1 struct {
+	ID string `json:"id"`
+	Title string `json:"title"`
+	Message string `json:"message"`
+}
+
+func (app *App) likeImageHandler(w http.ResponseWriter, r *http.Request) {
+	var data1 = Data1 {
+		ID:"1",
+		Title:"sample1",
+		Message: "hello",
+	}
+    // レスポンスヘッダーの設定
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+    // ステータスコードを設定
+    w.WriteHeader(200)
+
+    // httpResponseの内容を書き込む
+    buf, _ := json.Marshal(data1)
+    _, _ = w.Write(buf)
+}
+
 func (app *App) statsHandler(w http.ResponseWriter, r *http.Request) {
 	results := []*countResponse{}
 	collection := app.fsClient.Collection(entity.KindNameCount)
@@ -295,19 +318,4 @@ func (app *App) updateImage(ctx context.Context, id string, status entity.Status
 		}
 		return nil
 	})
-}
-
-func (app *App) createUser(w http.ResponseWriter, r *http.Request){
-	type User struct {
-		Name string `json:"name"`
-		Age  int    `json:"age"`
-	}
-	var user User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		log.Printf("failed to encode users: %s", err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}else{
-		fmt.Fprintf(w, "%s is %d years old!", user.Name, user.Age)
-	}
 }

@@ -11,6 +11,7 @@ import Header from "./components/Header";
 import { AuthProvider } from "./context/AuthContext";
 import Map from "./components/Mappage";
 import Signup from "./components/Signup";
+import Apitest from "./components/Apitest";
 
 const App: React.FC = () => {
     return (
@@ -25,6 +26,7 @@ const App: React.FC = () => {
                     <Route path="/stats" element={<Stats />}></Route>
                     <Route path="/map" element={<Map />}></Route>
                     <Route path="/signup" element={<Signup />}></Route>
+                    <Route path="/apitest" element={<Apitest />}></Route>
                 </Routes>
             </AuthProvider>
         </BrowserRouter>
