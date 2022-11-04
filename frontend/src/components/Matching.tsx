@@ -31,6 +31,16 @@ const useStyles = makeStyles({
         width: "80%",
         maxWidth: 0,
     },
+    swipeButtons__right: {
+        padding: "30px",
+        color: "#76e2b3",
+        backgroundColor: "#ffffe0",
+    },
+    swipeButtons__left: {
+        padding: "30px",
+        color: "#ec5e6f",
+        backgroundColor: "#ffffe0",
+    },
 });
 
 const Canvas: React.FC<{ size: number; image: ImageResponse | undefined }> = ({
@@ -42,18 +52,9 @@ const Canvas: React.FC<{ size: number; image: ImageResponse | undefined }> = ({
         const ctx = canvas.current.getContext("2d")!;
         const img = new Image();
         img.onload = () => {
-            const scale = image.size / size;
             ctx.drawImage(img, 0, 0, size, size);
             ctx.strokeStyle = "cyan";
             ctx.lineWidth = 2;
-            for (let i = 0; i < 68; i++) {
-                let [x, y] = [image.parts[i * 2], image.parts[i * 2 + 1]];
-                x /= scale;
-                y /= scale;
-                ctx.beginPath();
-                ctx.arc(x, y, 3, 0, 2 * Math.PI);
-                ctx.stroke();
-            }
         };
         img.src = image.image_url;
     }
@@ -66,6 +67,7 @@ const Canvas: React.FC<{ size: number; image: ImageResponse | undefined }> = ({
 
 const Matching: React.FC = () => {
     const theme = useTheme();
+    const classes = useStyles();
     const matches = useMediaQuery(theme.breakpoints.up("sm"));
     const history = useNavigate();
     const location = useLocation();
@@ -97,7 +99,6 @@ const Matching: React.FC = () => {
                 throw new Error(res.statusText);
             })
             .then((data: ImageResponse[]) => {
-                console.log(data.length);
                 if (data.length === 0) {
                     return;
                 }
@@ -118,7 +119,6 @@ const Matching: React.FC = () => {
             });
     };
     useEffect(() => {
-        console.log(location.search.length);
         if (location.search.length === 0) {
             return;
         }
@@ -158,9 +158,8 @@ const Matching: React.FC = () => {
         }
     }, [sort, order, history, location]);
     useEffect(() => {
-        console.log("index:" + index);
+        console.log(index);
         if (index < images.length && index >= 0) {
-            console.log("ok");
             history(
                 {
                     pathname: `/matching/${index}`,
@@ -169,16 +168,17 @@ const Matching: React.FC = () => {
                 { replace: true }
             );
         }
+        loadImages(history, location, images);
     }, [index]);
 
     const nextImage = () => {
-        setIndex(Number(param.id) + 1);
+        setIndex(index + 1);
     };
     const prevImage = () => {
-        setIndex(Number(param.id) - 1);
+        setIndex(index - 1);
     };
 
-    const current = (): ImageResponse => {
+    const current = (index: any): ImageResponse => {
         return images[index];
     };
 
@@ -204,7 +204,10 @@ const Matching: React.FC = () => {
             <Grid container>
                 <Grid item xs={12}>
                     <Grid container justifyContent="center">
-                        <Canvas size={matches ? 512 : 384} image={current()} />
+                        <Canvas
+                            size={matches ? 512 : 384}
+                            image={current(index)}
+                        />
                     </Grid>
                     <Grid container justifyContent="space-between">
                         <Box>
@@ -213,15 +216,15 @@ const Matching: React.FC = () => {
                             </Button>
                         </Box>
                         <Box>
-                            <FavoriteIcon>
-                                <Box mx={1}>NG</Box>
-                            </FavoriteIcon>
-                            <FavoriteIcon>
-                                <Box mx={1}>Pending</Box>
-                            </FavoriteIcon>
-                            <FavoriteIcon>
-                                <Box mx={1}>OK</Box>
-                            </FavoriteIcon>
+                            <IconButton
+                                className={classes.swipeButtons__left}
+                                color="primary"
+                            >
+                                <CloseIcon fontSize="large" />
+                            </IconButton>
+                            <IconButton className={classes.swipeButtons__right}>
+                                <FavoriteIcon fontSize="large" />
+                            </IconButton>
                         </Box>
                         <Box>
                             <Button onClick={() => nextImage()}>
