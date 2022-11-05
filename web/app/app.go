@@ -58,6 +58,7 @@ func (app *App) Handler() http.Handler {
 	api.HandleFunc("/image/{id}", app.updateImageHandler).Methods("PUT")
 	api.HandleFunc("/stats", app.statsHandler).Methods("GET")
 	api.HandleFunc("/imagelike", app.likeImageHandler)
+	api.HandleFunc("/userimage", app.userImageHandler).Methods("POST")
 
 	// wildcard endpoints
 	router.PathPrefix("/").HandlerFunc(app.appHandler)

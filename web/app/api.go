@@ -113,6 +113,37 @@ func (app *App) likeImageHandler(w http.ResponseWriter, r *http.Request) {
     buf, _ := json.Marshal(data1)
     _, _ = w.Write(buf)
 }
+// 構造を宣言
+type User struct {
+    Uid string `json:"uid"`
+    Image_url  string    `json:"image_url"`
+	Status  int    `json:"status"`
+}
+var Good []string
+var Bad []string
+func (app *App) userImageHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("userimage")
+	var user User
+    json.NewDecoder(r.Body).Decode(&user)
+	if(user.Status == 3){
+		newslice := append(Good,user.Image_url)
+		Good = newslice
+	}else if(user.Status == 1){
+		newslice := append(Bad,user.Image_url)
+		Bad = newslice
+	}
+	log.Printf("url:"+user.Image_url)
+	_, err := app.fsClient.Collection("Users").Doc(user.Uid).Set(r.Context(),map[string]interface{}{
+        "goodimage_url": Good,
+		"badimage_url": Bad,
+		"updatedAt": time.Now(),
+    })
+	if err != nil {
+        log.Fatalf("Failed adding data: %v", err)
+    }
+
+}
+
 
 func (app *App) statsHandler(w http.ResponseWriter, r *http.Request) {
 	results := []*countResponse{}

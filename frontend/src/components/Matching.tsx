@@ -24,6 +24,7 @@ import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import CloseIcon from "@material-ui/icons/Close";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import H from "history";
+import { useAuthContext } from "../context/AuthContext";
 
 import { ImageResponse } from "../common/interfaces";
 const useStyles = makeStyles({
@@ -78,6 +79,7 @@ const Matching: React.FC = () => {
     const [sort, setSort] = useState<string>(params.get("sort") || "id");
     const [order, setOrder] = useState<string>(params.get("order") || "asc");
     const param = useParams<{ id: string }>();
+    const { user } = useAuthContext();
     const loadImages = (
         history: NavigateFunction,
         location: H.Location,
@@ -177,9 +179,34 @@ const Matching: React.FC = () => {
     const prevImage = () => {
         setIndex(index - 1);
     };
+    const handlers = {
+        NEXT_IMAGE: nextImage,
+        PREV_IMAGE: prevImage,
+        STATUS_1: async () => await updateStatus(1),
+        STATUS_2: async () => await updateStatus(2),
+        STATUS_3: async () => await updateStatus(3),
+    };
 
     const current = (index: any): ImageResponse => {
         return images[index];
+    };
+    const updateStatus = async (status: number) => {
+        const res: Response = await fetch(`/api/userimage`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                uid: user?.uid,
+                image_url: current(index).image_url,
+                status: status,
+            }),
+        });
+        if (res.ok) {
+            nextImage();
+        } else {
+            console.error(res.status);
+        }
     };
 
     const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
@@ -219,10 +246,14 @@ const Matching: React.FC = () => {
                             <IconButton
                                 className={classes.swipeButtons__left}
                                 color="primary"
+                                onClick={async () => await updateStatus(1)}
                             >
                                 <CloseIcon fontSize="large" />
                             </IconButton>
-                            <IconButton className={classes.swipeButtons__right}>
+                            <IconButton
+                                className={classes.swipeButtons__right}
+                                onClick={async () => await updateStatus(3)}
+                            >
                                 <FavoriteIcon fontSize="large" />
                             </IconButton>
                         </Box>
