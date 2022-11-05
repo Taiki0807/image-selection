@@ -32,7 +32,6 @@ export const AuthProvider = ({ children }: AuthProps) => {
     const location = useLocation();
     const auth = getAuth(app);
     const [user, setUser] = useState<UserType>(null);
-    console.log(location.pathname);
     const isAvailableForViewing =
         location.pathname === "/" || location.pathname === "/signup";
     const value = {
@@ -43,7 +42,6 @@ export const AuthProvider = ({ children }: AuthProps) => {
         const authStateChanged = onAuthStateChanged(auth, async (user) => {
             console.log(user);
             setUser(user);
-            console.log(isAvailableForViewing);
             user == null && !isAvailableForViewing && (await router("/"));
         });
         return () => {
