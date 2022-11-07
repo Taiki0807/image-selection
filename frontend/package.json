@@ -1,7 +1,7 @@
 {
     "name": "frontend",
     "version": "0.1.0",
-    "homepage": "./https://matching-app.onrender.com/",
+    "homepage": "/https://matching-app.onrender.com/",
     "private": false,
     "dependencies": {
         "@material-ui/core": "^4.12.4",
