@@ -1,7 +1,7 @@
 {
     "name": "frontend",
     "version": "0.1.0",
-    "homepage": "https://hosokawa-lab.com/matching_app/",
+    "homepage": ".",
     "private": false,
     "dependencies": {
         "@material-ui/core": "^4.12.4",

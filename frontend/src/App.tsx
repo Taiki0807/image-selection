@@ -16,7 +16,7 @@ import Matching from "./components/Matching";
 
 const App: React.FC = () => {
     return (
-        <BrowserRouter basename="/matching_app">
+        <BrowserRouter>
             <AuthProvider>
                 <Header />
                 <Routes>
