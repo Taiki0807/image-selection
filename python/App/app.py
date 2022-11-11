@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from boto3 import Session
 
 from generate import *
-import PIL.Image
 
 import firebase_admin
 from firebase_admin import credentials
@@ -44,20 +43,19 @@ async def update_face(u_id:str):
     rgb_output = generate(batch_size, style_noises, noise_seed, mix_after=7, truncation_psi=truncation_psi) 
 
     images = convert_images_to_uint8(rgb_output, drange=[-1, 1])
-    if not os.path.exists(output_dir):  # 無ければ
+    if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     # Display all the images
-    for i in range(batch_size):
-        filename = f'results/seed{latent_seed}_{i}.png'
-        imsave(filename, images[i],channel_first=True)
-        blob = bucket.blob(filename)
-        blob.upload_from_filename(filename)
-        blob.make_public()
-        print(blob.public_url)
-        print(u_id)
-        city_ref = db.collection('Users').document(u_id)
-        city_ref.update({
-            'likeface_url': blob.public_url,
-            'updatedAt':datetime.datetime.now()
-        })
-    return {"image_url": "ok"}
+    filename = f'results/likeface{latent_seed}.png'
+    imsave(filename, images[i],channel_first=True)
+    blob = bucket.blob(filename)
+    blob.upload_from_filename(filename)
+    blob.make_public()
+    print(blob.public_url)
+    print(u_id)
+    city_ref = db.collection('Users').document(u_id)
+    city_ref.update({
+        'likeface_url': blob.public_url,
+        'updatedAt':datetime.datetime.now()
+    })
+    return {"status": "ok","face_url":blob.public_url}

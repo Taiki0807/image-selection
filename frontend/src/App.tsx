@@ -13,6 +13,7 @@ import Map from "./components/Mappage";
 import Signup from "./components/Signup";
 import Apitest from "./components/Apitest";
 import Matching from "./components/Matching";
+import Result_face from "./components/Result_face";
 
 const App: React.FC = () => {
     return (
@@ -29,6 +30,7 @@ const App: React.FC = () => {
                     <Route path="/map" element={<Map />}></Route>
                     <Route path="/signup" element={<Signup />}></Route>
                     <Route path="/apitest" element={<Apitest />}></Route>
+                    <Route path="/result" element={<Result_face />}></Route>
                 </Routes>
             </AuthProvider>
         </BrowserRouter>

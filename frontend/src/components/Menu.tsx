@@ -31,6 +31,11 @@ const Menu: React.FC = () => {
                         matching
                     </Link>
                 </ListItem>
+                <ListItem>
+                    <Link component={link} to="/result">
+                        好み顔生成
+                    </Link>
+                </ListItem>
             </List>
         </Container>
     );
