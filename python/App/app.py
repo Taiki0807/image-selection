@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from boto3 import Session
+import requests
 
 from generate import *
 
@@ -19,6 +20,16 @@ app = FastAPI()
 # バケット名,オブジェクト名
 BUCKET_NAME = 'my-face-model'
 OBJECT_KEY_NAME = 'styleGAN2_G_params.h5'
+
+def S3_upload(aws_bucket, aws_file, aws_key):
+    session = Session()
+    print("S3にアップロード中")
+    client = session.client('s3',region_name='ap-northeast-3')
+    client.upload_file(aws_file, aws_bucket, aws_key)
+    return
+
+def get_as_byteimage(url):
+    return bytearray(requests.get(url).content)
 
 @app.get("/health")
 async def get_health():
@@ -46,7 +57,7 @@ async def update_face(u_id:str):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     # Display all the images
-    filename = f'results/likeface{latent_seed}.png'
+    filename = f'results/{u_id}_likeface.png'
     imsave(filename, images[i],channel_first=True)
     blob = bucket.blob(filename)
     blob.upload_from_filename(filename)
@@ -59,3 +70,14 @@ async def update_face(u_id:str):
         'updatedAt':datetime.datetime.now()
     })
     return {"status": "ok","face_url":blob.public_url}
+
+@app.get("/similarity_measure")
+async def get_health(url_source:str,url_target:str):
+    session = Session()
+    # Rekognition呼び出し
+    rekognition = session.client("rekognition",region_name='ap-northeast-1')
+    image_data = get_as_byteimage(url_source)
+    target_image = get_as_byteimage(url_target)
+    response = rekognition.compare_faces(SimilarityThreshold=80,SourceImage={'Bytes': image_data},TargetImage={'Bytes': target_image})
+    similarity = response['FaceMatches']
+    return {"percentage": response}
