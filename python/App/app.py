@@ -58,20 +58,20 @@ async def update_face(u_id:str):
         os.makedirs(output_dir)
     # Display all the images
     filename = f'results/{u_id}_likeface.png'
-    imsave(filename, images[i],channel_first=True)
+    imsave(filename, images[0],channel_first=True)
     blob = bucket.blob(filename)
     blob.upload_from_filename(filename)
     blob.make_public()
     print(blob.public_url)
     print(u_id)
-    city_ref = db.collection('Users').document(u_id)
+    city_ref = db.collection('users').document(u_id)
     city_ref.update({
         'likeface_url': blob.public_url,
         'updatedAt':datetime.datetime.now()
     })
     return {"status": "ok","face_url":blob.public_url}
 
-@app.get("/similarity_measure")
+@app.post("/similarity_measure")
 async def get_health(url_source:str,url_target:str):
     session = Session()
     # Rekognition呼び出し
@@ -79,5 +79,7 @@ async def get_health(url_source:str,url_target:str):
     image_data = get_as_byteimage(url_source)
     target_image = get_as_byteimage(url_target)
     response = rekognition.compare_faces(SimilarityThreshold=80,SourceImage={'Bytes': image_data},TargetImage={'Bytes': target_image})
-    similarity = response['FaceMatches']
-    return {"percentage": response}
+    matches = response['FaceMatches']
+    match = matches[0]
+    res2 = match['Similarity']
+    return {"percentage": res2}
