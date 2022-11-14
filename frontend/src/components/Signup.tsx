@@ -14,6 +14,8 @@ import { useNavigate } from "react-router";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "@material-ui/lab/Alert";
 import { auth, db, storage } from "../firebase";
+import moment from "moment";
+import md5 from "md5";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -44,6 +46,7 @@ const Signup: React.FC = () => {
     const [displayName, setDisplayname] = useState("");
     const [signup, setSignup] = useState(false);
     const [err, setErr] = useState(false);
+    const now = moment();
     const onFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         console.log("onChange!");
 
@@ -85,8 +88,16 @@ const Signup: React.FC = () => {
                             displayName,
                             email,
                             photoURL: downloadURL,
+                            UpdateAt: now.format(),
                         });
-                        await setDoc(doc(db, "userChats", res.user.uid), {});
+                        const hash = md5(downloadURL);
+                        console.log(hash);
+                        await setDoc(doc(db, "usersimage", hash), {
+                            ImageURL: downloadURL,
+                            ID: hash,
+                            UID: res.user.uid,
+                            UpdateAt: now.format(),
+                        });
                     } catch (error: any) {
                         console.log(error);
                         setErr(true);

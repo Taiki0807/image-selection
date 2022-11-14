@@ -26,7 +26,7 @@ import FavoriteIcon from "@material-ui/icons/Favorite";
 import H from "history";
 import { useAuthContext } from "../context/AuthContext";
 
-import { ImageResponse } from "../common/interfaces";
+import { UserImageResponse } from "../common/interfaces";
 const useStyles = makeStyles({
     tableCell: {
         width: "80%",
@@ -44,10 +44,10 @@ const useStyles = makeStyles({
     },
 });
 
-const Canvas: React.FC<{ size: number; image: ImageResponse | undefined }> = ({
-    size,
-    image,
-}) => {
+const Canvas: React.FC<{
+    size: number;
+    image: UserImageResponse | undefined;
+}> = ({ size, image }) => {
     const canvas = useRef<HTMLCanvasElement>(null);
     if (image != null && canvas.current != null) {
         const ctx = canvas.current.getContext("2d")!;
@@ -72,7 +72,7 @@ const Matching: React.FC = () => {
     const matches = useMediaQuery(theme.breakpoints.up("sm"));
     const history = useNavigate();
     const location = useLocation();
-    const [images, setImages] = useState<ImageResponse[]>([]);
+    const [images, setImages] = useState<UserImageResponse[]>([]);
     const last = useRef<string>();
     const [index, setIndex] = useState(0);
     const params = new URLSearchParams(location.search);
@@ -80,16 +80,18 @@ const Matching: React.FC = () => {
     const [order, setOrder] = useState<string>(params.get("order") || "asc");
     const param = useParams<{ id: string }>();
     const { user } = useAuthContext();
+    const [posts, setPosts] = useState<any>([]);
+    const scoreprams = new URLSearchParams(location.search);
     const loadImages = (
         history: NavigateFunction,
         location: H.Location,
-        images: ImageResponse[]
+        images: UserImageResponse[]
     ) => {
         params.set("count", "100");
         if (last.current) {
             params.set("id", last.current);
         }
-        fetch(`/api/images?${params}`)
+        fetch(`/api/usersimages?${params}`)
             .then((res: Response) => {
                 if (res.ok) {
                     return res.json();
@@ -100,17 +102,17 @@ const Matching: React.FC = () => {
                 }
                 throw new Error(res.statusText);
             })
-            .then((data: ImageResponse[]) => {
+            .then((data: UserImageResponse[]) => {
                 if (data.length === 0) {
                     return;
                 }
                 last.current = data[data.length - 1].id;
                 const ids = new Set(
-                    images.map((value: ImageResponse) => value.id)
+                    images.map((value: UserImageResponse) => value.id)
                 );
                 setImages(
                     images.concat(
-                        data.filter((value: ImageResponse) => {
+                        data.filter((value: UserImageResponse) => {
                             return !ids.has(value.id);
                         })
                     )
@@ -118,6 +120,22 @@ const Matching: React.FC = () => {
             })
             .catch((err: Error) => {
                 window.console.error(err.message);
+            });
+    };
+    const score = () => {
+        params.set(
+            "url_source",
+            "https://storage.googleapis.com/ace-cycling-356912.appspot.com/images/0b22edd801280f1b5cde42e57d826967"
+        );
+        params.set(
+            "url_target",
+            "https://storage.googleapis.com/ace-cycling-356912.appspot.com/images/0b22edd801280f1b5cde42e57d826967"
+        );
+        fetch(`/similarity_measure?${params}`, { method: "POST" })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data);
+                setPosts(data);
             });
     };
     useEffect(() => {
@@ -171,6 +189,7 @@ const Matching: React.FC = () => {
             );
         }
         loadImages(history, location, images);
+        score();
     }, [index]);
 
     const nextImage = () => {
@@ -187,21 +206,25 @@ const Matching: React.FC = () => {
         STATUS_3: async () => await updateStatus(3),
     };
 
-    const current = (index: any): ImageResponse => {
+    const current = (index: any): UserImageResponse => {
         return images[index];
     };
     const updateStatus = async (status: number) => {
-        const res: Response = await fetch(`/api/userimage`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                uid: user?.uid,
-                image_url: current(index).image_url,
-                status: status,
-            }),
-        });
+        const res: Response = await fetch(
+            `/api/usersimage`,
+            {
+                method: "POST",
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    uid: user?.uid,
+                    touid: current(index).uid,
+                    status: status,
+                }),
+            }
+        );
         if (res.ok) {
             nextImage();
         } else {
@@ -225,7 +248,7 @@ const Matching: React.FC = () => {
                     <Link color="inherit" component={link}>
                         Map
                     </Link>
-                    <Typography color="textPrimary">Image</Typography>
+                    <Typography color="textPrimary">Matching</Typography>
                 </Breadcrumbs>
             </Box>
             <Grid container>
@@ -263,6 +286,11 @@ const Matching: React.FC = () => {
                             </Button>
                         </Box>
                     </Grid>
+                </Grid>
+                <Grid item xs={12}>
+                    <Typography variant="h1" component="h2">
+                        マッチ度:{posts.percentage}%
+                    </Typography>
                 </Grid>
             </Grid>
         </Container>

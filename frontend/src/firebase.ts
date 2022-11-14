@@ -4,12 +4,12 @@ import { getStorage } from "firebase/storage";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDfFfrYUz6i-Xfy3imO2CTWp5SFeA-yP_k",
-    authDomain: "image-707ea.firebaseapp.com",
-    projectId: "image-707ea",
-    storageBucket: "image-707ea.appspot.com",
-    messagingSenderId: "377889197876",
-    appId: "1:377889197876:web:ad60470c58c98aafee5f61",
+    apiKey: "AIzaSyAS8lqTPsqxrmd9MqwDTsdybceRZ7yLbrM",
+    authDomain: "ace-cycling-356912.firebaseapp.com",
+    projectId: "ace-cycling-356912",
+    storageBucket: "ace-cycling-356912.appspot.com",
+    messagingSenderId: "513097422170",
+    appId: "1:513097422170:web:0872ce61c27646a9e10f63",
 };
 
 export const app = firebase.initializeApp(firebaseConfig);

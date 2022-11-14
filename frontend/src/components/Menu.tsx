@@ -27,13 +27,18 @@ const Menu: React.FC = () => {
                     </Link>
                 </ListItem>
                 <ListItem>
-                    <Link component={link} to="/matching/0">
-                        matching
+                    <Link component={link} to="/selection/0">
+                        顔生成(好み選別)
                     </Link>
                 </ListItem>
                 <ListItem>
                     <Link component={link} to="/result">
-                        好み顔生成
+                        好み顔確認
+                    </Link>
+                </ListItem>
+                <ListItem>
+                    <Link component={link} to="/matching/0">
+                        マッチング
                     </Link>
                 </ListItem>
             </List>
