@@ -59,7 +59,10 @@ func (app *App) Handler() http.Handler {
 	api.HandleFunc("/stats", app.statsHandler).Methods("GET")
 	api.HandleFunc("/imagelike", app.likeImageHandler)
 	api.HandleFunc("/userimage", app.userImageHandler).Methods("POST")
-
+	api.HandleFunc("/get_likeurl", app.getlikeimageHandler).Methods("POST")
+	api.HandleFunc("/usersimages", app.usersimageHandler).Methods("GET")
+	api.HandleFunc("/usersimage", app.updatematching).Methods("POST")
+	
 	// wildcard endpoints
 	router.PathPrefix("/").HandlerFunc(app.appHandler)
 

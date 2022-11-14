@@ -133,15 +133,91 @@ func (app *App) userImageHandler(w http.ResponseWriter, r *http.Request) {
 		Bad = newslice
 	}
 	log.Printf("url:"+user.Image_url)
-	_, err := app.fsClient.Collection("Users").Doc(user.Uid).Set(r.Context(),map[string]interface{}{
+	_, err := app.fsClient.Collection("users").Doc(user.Uid).Set(r.Context(),map[string]interface{}{
         "goodimage_url": Good,
 		"badimage_url": Bad,
+		"updatedAt": time.Now(),
+    },firestore.MergeAll)
+	if err != nil {
+        log.Fatalf("Failed adding data: %v", err)
+    }
+
+}
+type Data_image struct {
+	Likeimageurl string `json:"url"`
+}
+
+func (app *App) getlikeimageHandler(w http.ResponseWriter, r *http.Request) {
+    r.ParseForm()
+	Uid := r.Form.Get("uid")
+	// データ読み取り
+	ref, err := app.fsClient.Collection("users").Doc(Uid).Get(r.Context())
+	log.Printf(Uid)
+	if err != nil {
+        log.Fatalf("Failed adding data: %v", err)
+    }
+	log.Printf("likeimageurl")
+	url, err := ref.DataAt("likeface_url")
+	if err != nil {
+        log.Fatalf("Failed adding data: %v", err)
+    }
+	var data1 = Data_image {
+		Likeimageurl:url.(string),
+	}
+    // レスポンスヘッダーの設定
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+    // ステータスコードを設定
+    w.WriteHeader(200)
+
+    // httpResponseの内容を書き込む
+    buf, _ := json.Marshal(data1)
+    _, _ = w.Write(buf)
+}
+
+
+func (app *App) usersimageHandler(w http.ResponseWriter, r *http.Request) {
+	images, err := app.fetchusersImages(r)
+	if err != nil {
+		log.Printf("failed to fetch data: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(&images); err != nil {
+		log.Printf("failed to encode images: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+}
+// 構造を宣言
+type matching struct {
+    Uid string `json:"uid"`
+    Touid  string    `json:"touid"`
+	Status int `json:status`
+}
+var matchinguid []string
+var likeuser []string
+func (app *App) updatematching(w http.ResponseWriter, r *http.Request) {
+	log.Printf("updatemaching")
+	var data matching
+    json.NewDecoder(r.Body).Decode(&data)
+	if(data.Status == 3){
+		newslice := append(likeuser,data.Touid)
+		likeuser = newslice
+		newslice = append(matchinguid,data.Touid)
+		matchinguid = newslice
+	}else if(data.Status == 1){
+		return
+	}
+	_, err := app.fsClient.Collection("matching").Doc(data.Uid).Set(r.Context(),map[string]interface{}{
+        "likeuser":likeuser,
+		"matched":matchinguid,
 		"updatedAt": time.Now(),
     })
 	if err != nil {
         log.Fatalf("Failed adding data: %v", err)
     }
-
 }
 
 
@@ -220,6 +296,37 @@ func (app *App) fetchImages(r *http.Request) ([]*imageResponse, error) {
 			PublishedAt: image.PublishedAt.Unix(),
 			UpdatedAt:   image.UpdatedAt.Unix(),
 			Meta:        string(image.Meta),
+		})
+	}
+	return images, nil
+}
+
+
+func (app *App) fetchusersImages(r *http.Request) ([]*usersimageResponse, error) {
+	query, err := app.makeQuery_user(r)
+	if err != nil {
+		return nil, err
+	}
+	images := []*usersimageResponse{}
+	iter := query.Documents(r.Context())
+	for {
+		document, err := iter.Next()
+		if err != nil {
+			if errors.Is(err, iterator.Done) {
+				break
+			} else {
+				return nil, err
+			}
+		}
+		var image entity.UserImage
+		if err := document.DataTo(&image); err != nil {
+			return nil, err
+		}
+		images = append(images, &usersimageResponse{
+			ID:          image.ID,
+			ImageURL:    image.ImageURL,
+			UID:         image.UID,
+			UpdatedAt:   image.UpdatedAt.Unix(),
 		})
 	}
 	return images, nil
@@ -320,6 +427,64 @@ func (app *App) makeQuery(r *http.Request) (*firestore.Query, error) {
 	return &query, nil
 }
 
+
+func (app *App) makeQuery_user(r *http.Request) (*firestore.Query, error) {
+	values := r.URL.Query()
+	collection := app.fsClient.Collection(entity.KindNameUserImage)
+	query := collection.Query
+	if values.Get("count") != "" {
+		count, err := strconv.Atoi(values.Get("count"))
+		if err != nil {
+			return nil, err
+		}
+		query = query.Limit(count)
+	} else {
+		query = query.Limit(limit)
+	}
+	// `Order`
+	{
+		if values.Get("sort") != "" {
+			if path, ok := sortMap[values.Get("sort")]; ok {
+				reverse := values.Get("reverse") == "true"
+				if values.Get("order") == "desc" {
+					reverse = !reverse
+				}
+				if values.Get("id") != "" {
+					var op string
+					if reverse {
+						op = "<="
+					} else {
+						op = ">="
+					}
+					var image entity.Image
+					document, err := collection.Doc(values.Get("id")).Get(context.Background())
+					if err != nil {
+						return nil, err
+					}
+					if err := document.DataTo(&image); err != nil {
+						return nil, err
+					}
+					switch path {
+					case "ID":
+						query = query.Where(path, op, image.ID)
+					case "PublishedAt":
+						query = query.Where(path, op, image.PublishedAt)
+					case "UpdatedAt":
+						query = query.Where(path, op, image.UpdatedAt)
+					}
+				}
+				if reverse {
+					query = query.OrderBy(path, firestore.Desc)
+				} else {
+					query = query.OrderBy(path, firestore.Asc)
+				}
+			} else {
+				return nil, fmt.Errorf("invalid sort query: %v", values.Get("sort"))
+			}
+		}
+	}
+	return &query, nil
+}
 func (app *App) updateImage(ctx context.Context, id string, status entity.Status) error {
 	return app.fsClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		docRef := app.fsClient.Collection(entity.KindNameImage).Doc(id)

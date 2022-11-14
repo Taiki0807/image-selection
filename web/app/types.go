@@ -14,6 +14,13 @@ type imageResponse struct {
 	Meta        string `json:"meta"`
 }
 
+type usersimageResponse struct {
+	ID          string `json:"id"`
+	ImageURL    string `json:"image_url"`
+	UID         string `json:"uid"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
 type countResponse struct {
 	Size      string `json:"size"`
 	Ready     int    `json:"status_ready"`

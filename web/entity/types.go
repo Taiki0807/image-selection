@@ -10,6 +10,7 @@ const (
 	KindNameImage = "Image"
 	KindNameCount = "Count"
 	KindNameUser = "User"
+	KindNameUserImage = "usersimage"
 )
 
 // Status values
@@ -58,6 +59,12 @@ type Image struct {
 	Meta        []byte `datastore:",noindex"`
 }
 
+type UserImage struct {
+	ID          string
+	ImageURL    string
+	UID         string
+	UpdatedAt   time.Time
+}
 // Count type
 type Count struct {
 	Ready     int
