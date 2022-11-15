@@ -27,6 +27,7 @@ import { Theme, withStyles } from "@material-ui/core/styles";
 
 import MenuItem from "@material-ui/core/MenuItem";
 import Menu from "@material-ui/core/Menu";
+import { ImageContext } from "../context/LikeImage";
 
 const useStyles = makeStyles((theme: Theme) => {
     return createStyles({
@@ -85,7 +86,7 @@ const Header: React.FC = () => {
     const isLoggedIn = !(user == null);
     const auth = getAuth(app);
     const router = useNavigate();
-    const [likeimage, setLikeimage] = useState("");
+    const { likeimage, setLikeimage }: any = ImageContext();
 
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);

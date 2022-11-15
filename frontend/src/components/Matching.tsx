@@ -25,6 +25,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import H from "history";
 import { useAuthContext } from "../context/AuthContext";
+import { ImageContext } from "../context/LikeImage";
 
 import { UserImageResponse } from "../common/interfaces";
 const useStyles = makeStyles({
@@ -73,6 +74,7 @@ const Matching: React.FC = () => {
     const history = useNavigate();
     const location = useLocation();
     const [images, setImages] = useState<UserImageResponse[]>([]);
+    const [image, setImage] = useState("");
     const last = useRef<string>();
     const [index, setIndex] = useState(0);
     const params = new URLSearchParams(location.search);
@@ -81,7 +83,8 @@ const Matching: React.FC = () => {
     const param = useParams<{ id: string }>();
     const { user } = useAuthContext();
     const [posts, setPosts] = useState<any>([]);
-    const scoreprams = new URLSearchParams(location.search);
+    const scoreprams = new URLSearchParams("");
+    const { likeimage }: any = ImageContext();
     const loadImages = (
         history: NavigateFunction,
         location: H.Location,
@@ -122,16 +125,15 @@ const Matching: React.FC = () => {
                 window.console.error(err.message);
             });
     };
+    const current = (index: any): UserImageResponse => {
+        return images[index];
+    };
     const score = () => {
-        params.set(
-            "url_source",
-            "https://storage.googleapis.com/ace-cycling-356912.appspot.com/images/0b22edd801280f1b5cde42e57d826967"
-        );
-        params.set(
-            "url_target",
-            "https://storage.googleapis.com/ace-cycling-356912.appspot.com/images/0b22edd801280f1b5cde42e57d826967"
-        );
-        fetch(`/similarity_measure?${params}`, { method: "POST" })
+        scoreprams.set("url_source", likeimage);
+        scoreprams.set("url_target", image);
+        fetch(`/fastapi/similarity_measure?${scoreprams}`, {
+            method: "POST",
+        })
             .then((res) => res.json())
             .then((data) => {
                 console.log(data);
@@ -149,6 +151,8 @@ const Matching: React.FC = () => {
         }
         setIndex(Number(param.id));
         loadImages(history, location, images);
+        setImage(current(index).image_url);
+        score();
     }, []);
     useEffect(() => {
         if (last.current) {
@@ -178,7 +182,6 @@ const Matching: React.FC = () => {
         }
     }, [sort, order, history, location]);
     useEffect(() => {
-        console.log(index);
         if (index < images.length && index >= 0) {
             history(
                 {
@@ -189,6 +192,7 @@ const Matching: React.FC = () => {
             );
         }
         loadImages(history, location, images);
+        setImage(current(index).image_url);
         score();
     }, [index]);
 
@@ -205,26 +209,19 @@ const Matching: React.FC = () => {
         STATUS_2: async () => await updateStatus(2),
         STATUS_3: async () => await updateStatus(3),
     };
-
-    const current = (index: any): UserImageResponse => {
-        return images[index];
-    };
     const updateStatus = async (status: number) => {
-        const res: Response = await fetch(
-            `/api/usersimage`,
-            {
-                method: "POST",
-                headers: {
-                    "Access-Control-Allow-Origin": "*",
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    uid: user?.uid,
-                    touid: current(index).uid,
-                    status: status,
-                }),
-            }
-        );
+        const res: Response = await fetch(`/api/usersimage`, {
+            method: "POST",
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                uid: user?.uid,
+                touid: current(index).uid,
+                status: status,
+            }),
+        });
         if (res.ok) {
             nextImage();
         } else {
