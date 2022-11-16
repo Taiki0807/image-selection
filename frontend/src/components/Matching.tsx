@@ -85,7 +85,9 @@ const Matching: React.FC = () => {
     const [posts, setPosts] = useState<any>([]);
     const scoreprams = new URLSearchParams("");
     const { likeimage }: any = ImageContext();
-    const loadImages = (
+    var cnt = 0;
+    var current_index = 0;
+    const loadImages = async (
         history: NavigateFunction,
         location: H.Location,
         images: UserImageResponse[]
@@ -94,7 +96,7 @@ const Matching: React.FC = () => {
         if (last.current) {
             params.set("id", last.current);
         }
-        fetch(`/api/usersimages?${params}`)
+        await fetch(`/api/usersimages?${params}`)
             .then((res: Response) => {
                 if (res.ok) {
                     return res.json();
@@ -120,6 +122,7 @@ const Matching: React.FC = () => {
                         })
                     )
                 );
+                setImage(data[index].image_url);
             })
             .catch((err: Error) => {
                 window.console.error(err.message);
@@ -151,9 +154,13 @@ const Matching: React.FC = () => {
         }
         setIndex(Number(param.id));
         loadImages(history, location, images);
-        setImage(current(index).image_url);
-        score();
     }, []);
+    useEffect(() => {
+        cnt++;
+        if (images.length !== 0 && cnt === 0) {
+            score();
+        }
+    }, [images]);
     useEffect(() => {
         if (last.current) {
             last.current = undefined;
@@ -192,15 +199,23 @@ const Matching: React.FC = () => {
             );
         }
         loadImages(history, location, images);
-        setImage(current(index).image_url);
-        score();
+        if (images.length !== 0) {
+            score();
+        }
     }, [index]);
 
     const nextImage = () => {
-        setIndex(index + 1);
+        current_index = index + 1;
+        setIndex(current_index);
+        setImage(current(current_index).image_url);
     };
     const prevImage = () => {
-        setIndex(index - 1);
+        current_index = index - 1;
+        if (current_index < 0) {
+            current_index = 0;
+        }
+        setIndex(current_index);
+        setImage(current(current_index).image_url);
     };
     const handlers = {
         NEXT_IMAGE: nextImage,
