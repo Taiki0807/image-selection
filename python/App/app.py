@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.routing import APIRouter
+from fastapi.middleware.cors import CORSMiddleware
 from boto3 import Session
 import requests
 
@@ -16,7 +18,8 @@ default_app = firebase_admin.initialize_app(cred)
 bucket = storage.bucket("ace-cycling-356912.appspot.com", default_app)
 db = firestore.client()
 
-app = FastAPI()
+prefix_router = APIRouter()
+
 # バケット名,オブジェクト名
 BUCKET_NAME = 'my-face-model'
 OBJECT_KEY_NAME = 'styleGAN2_G_params.h5'
@@ -31,11 +34,11 @@ def S3_upload(aws_bucket, aws_file, aws_key):
 def get_as_byteimage(url):
     return bytearray(requests.get(url).content)
 
-@app.get("/health")
+@prefix_router.get("/health")
 async def get_health():
     return {"message": "OK"}
 
-@app.post("/make_face/{u_id}")
+@prefix_router.post("/make_face/{u_id}")
 async def update_face(u_id:str):
     num_layers = 18
     output_dir = 'results'
@@ -71,15 +74,24 @@ async def update_face(u_id:str):
     })
     return {"status": "ok","face_url":blob.public_url}
 
-@app.post("/similarity_measure")
+@prefix_router.post("/similarity_measure")
 async def get_health(url_source:str,url_target:str):
     session = Session()
     # Rekognition呼び出し
     rekognition = session.client("rekognition",region_name='ap-northeast-1')
     image_data = get_as_byteimage(url_source)
     target_image = get_as_byteimage(url_target)
-    response = rekognition.compare_faces(SimilarityThreshold=80,SourceImage={'Bytes': image_data},TargetImage={'Bytes': target_image})
-    matches = response['FaceMatches']
-    match = matches[0]
-    res2 = match['Similarity']
+    response = rekognition.compare_faces(SimilarityThreshold=10,SourceImage={'Bytes': image_data},TargetImage={'Bytes': target_image})
+    if not response['FaceMatches']:
+        res2 = 0
+    else:
+        matches = response['FaceMatches']
+        match = matches[0]
+        res2 = match['Similarity']
     return {"percentage": res2}
+
+app = FastAPI()
+app.include_router(
+    prefix_router,
+    prefix="/fastapi"
+)

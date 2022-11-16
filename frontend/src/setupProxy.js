@@ -3,7 +3,7 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 module.exports = function (app) {
     app.use(
         createProxyMiddleware("/fastapi", {
-            target: "http://127.0.0.1:8080",
+            target: "http://127.0.0.1:6060",
             changeOrigin: true,
         })
     );
