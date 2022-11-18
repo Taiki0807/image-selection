@@ -58,6 +58,9 @@ module.exports = {
         "@typescript-eslint/no-floating-promises": "off",
         "@typescript-eslint/promise-function-async": "off",
         "@typescript-eslint/consistent-type-definitions": "off",
+        "@typescript-eslint/no-non-null-asserted-": "off",
+        "@typescript-eslint/no-non-null-asserted-optional-chain": "off",
+        "no-template-curly-in-string": "off",
         "react/jsx-key": "off",
         "@typescript-eslint/triple-slash-reference": [
             "error",
