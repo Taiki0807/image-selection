@@ -112,7 +112,6 @@ const Header: React.FC = () => {
     const onGeneratefaceOpen = async () => {
         handleClose();
         handleClickOpen();
-        handleclallapi();
     };
 
     const onClickSignout = async () => {
@@ -174,22 +173,24 @@ const Header: React.FC = () => {
     const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
         (props, ref) => <RouterLink ref={ref} to="/menu" {...props} />
     );
-    function handleclallapi() {
-        fetch(`/api/get_likeurl` + "?uid=" + user?.uid, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                uid: user?.uid,
-            }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                console.log(data);
-                setLikeimage(data.url);
-            });
-    }
+    useEffect(() => {
+        if (user?.uid !== undefined) {
+            fetch(`/api/get_likeurl` + "?uid=" + user?.uid, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    uid: user?.uid,
+                }),
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log(data);
+                    setLikeimage(data.url);
+                });
+        }
+    }, [user?.uid]);
     return (
         <>
             <AppBar position="static">

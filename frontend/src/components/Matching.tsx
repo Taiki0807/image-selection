@@ -84,10 +84,9 @@ const Matching: React.FC = () => {
     const { user } = useAuthContext();
     const [posts, setPosts] = useState<any>([]);
     const scoreprams = new URLSearchParams("");
-    const { likeimage }: any = ImageContext();
-    var cnt = 0;
+    const { likeimage, setLikeimage }: any = ImageContext();
     var current_index = 0;
-    const loadImages = async (
+    const loadImages = (
         history: NavigateFunction,
         location: H.Location,
         images: UserImageResponse[]
@@ -96,7 +95,7 @@ const Matching: React.FC = () => {
         if (last.current) {
             params.set("id", last.current);
         }
-        await fetch(`/api/usersimages?${params}`)
+        fetch(`/api/usersimages?${params}`)
             .then((res: Response) => {
                 if (res.ok) {
                     return res.json();
@@ -134,7 +133,7 @@ const Matching: React.FC = () => {
     const score = () => {
         scoreprams.set("url_source", likeimage);
         scoreprams.set("url_target", image);
-        fetch(`/fastapi/similarity_measure?${scoreprams}`, {
+        fetch(`/fastapi/similarity_measure_facenet?${scoreprams}`, {
             method: "POST",
         })
             .then((res) => res.json())
@@ -156,11 +155,10 @@ const Matching: React.FC = () => {
         loadImages(history, location, images);
     }, []);
     useEffect(() => {
-        cnt++;
-        if (images.length !== 0 && cnt === 0) {
+        if (images.length !== 0 && likeimage !== "") {
             score();
         }
-    }, [images]);
+    }, [images, likeimage]);
     useEffect(() => {
         if (last.current) {
             last.current = undefined;
@@ -189,7 +187,7 @@ const Matching: React.FC = () => {
         }
     }, [sort, order, history, location]);
     useEffect(() => {
-        if (index < images.length && index >= 0) {
+        if (index < images.length && index >= 0 && index !== undefined) {
             history(
                 {
                     pathname: `/matching/${index}`,
@@ -198,8 +196,10 @@ const Matching: React.FC = () => {
                 { replace: true }
             );
         }
-        loadImages(history, location, images);
         if (images.length !== 0) {
+            loadImages(history, location, images);
+        }
+        if (images.length !== 0 && likeimage !== "") {
             score();
         }
     }, [index]);

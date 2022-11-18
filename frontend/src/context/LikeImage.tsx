@@ -19,9 +19,7 @@ export function ImageContext() {
 }
 
 export function LikeimageProvider({ children }: ImageProps) {
-    const [likeimage, setLikeimage] = useState(
-        "https://impreatesoft.jp/wp-content/uploads/model_51.png"
-    );
+    const [likeimage, setLikeimage] = useState("");
     const values = {
         likeimage,
         setLikeimage,
