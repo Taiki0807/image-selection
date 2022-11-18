@@ -3,6 +3,14 @@ from fastapi.routing import APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from boto3 import Session
 import requests
+from mtcnn.mtcnn import MTCNN
+from keras_facenet import FaceNet
+import numpy as np
+import cv2
+import os
+import glob
+import scipy
+from scipy import spatial
 
 from generate import *
 
@@ -24,6 +32,17 @@ prefix_router = APIRouter()
 BUCKET_NAME = 'my-face-model'
 OBJECT_KEY_NAME = 'styleGAN2_G_params.h5'
 
+embeddings = []
+imgs = []
+detector = MTCNN()
+embedder = FaceNet()
+
+x_max = 1.03
+x_min = 0.04
+sc_max = 0
+sc_min = 100
+types = ('jpg', 'png')
+
 def S3_upload(aws_bucket, aws_file, aws_key):
     session = Session()
     print("S3にアップロード中")
@@ -33,6 +52,18 @@ def S3_upload(aws_bucket, aws_file, aws_key):
 
 def get_as_byteimage(url):
     return bytearray(requests.get(url).content)
+def save_image(url,filename):
+    response = requests.get(url)
+    image = response.content
+    url_separate = os.path.splitext(url)
+    # 拡張子の後(.jpgとか)をurl_extensionに代入する
+    url_extension = url_separate[1]
+    # URLに拡張子がなかった場合.pngにする
+    if url_extension == "png":
+        cv2.imwrite(filename + '.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 95])
+        # ファイルの名前を作る
+    with open(filename, "wb") as aaa:
+        aaa.write(image)
 
 @prefix_router.get("/health")
 async def get_health():
@@ -89,6 +120,34 @@ async def get_health(url_source:str,url_target:str):
         match = matches[0]
         res2 = match['Similarity']
     return {"percentage": res2}
+
+@prefix_router.post("/similarity_measure_facenet")
+def get_percentage(url_source:str,url_target:str):
+    save_image(url_source,"source.jpg")
+    save_image(url_target,"target.jpg")
+    for i in range(2):
+        files = glob.glob("*.jpg")
+        for i, file in enumerate(files):
+            img = cv2.imread(str(file))
+            embedding = embedder.embeddings([img])
+            embeddings.append(embedding[0])
+            imgs.append(img)  # 顔領域を保存しておく
+    # ユークリッド距離を計算
+    def calc_euclid_distance(a, b):
+        return scipy.spatial.distance.euclidean(a, b)
+
+    image1 = embeddings[0]
+    image2 = embeddings[1]
+
+    result = calc_euclid_distance(image1, image2)
+    if result >= 0.04 and result <= 1.03:
+        res = (result - x_min) / (x_max - x_min) * (sc_max - sc_min) + sc_min
+    elif result < 0.04:
+        res = 100
+    elif result > 1.03:
+        res = 0
+    print(result)
+    return {"percentage": res}
 
 app = FastAPI()
 app.include_router(
