@@ -12,7 +12,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/gorilla/mux"
-	"github.com/sugyan/image-dataset/web/entity"
+	"github.com/Taiki0807/image-selection/web/entity"
 	"google.golang.org/api/iterator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -190,6 +190,21 @@ func (app *App) usersimageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+func (app *App) selectimageHandler(w http.ResponseWriter, r *http.Request) {
+	images, err := app.fetchusersImages_stylegan2(r)
+	if err != nil {
+		log.Printf("failed to fetch data: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(&images); err != nil {
+		log.Printf("failed to encode images: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+}
+
 // 構造を宣言
 type matching struct {
     Uid string `json:"uid"`
@@ -332,6 +347,36 @@ func (app *App) fetchusersImages(r *http.Request) ([]*usersimageResponse, error)
 	return images, nil
 }
 
+func (app *App) fetchusersImages_stylegan2(r *http.Request) ([]*usersimageResponse2, error) {
+	query, err := app.makeQuery_stylegan2(r)
+	if err != nil {
+		return nil, err
+	}
+	images := []*usersimageResponse2{}
+	iter := query.Documents(r.Context())
+	for {
+		document, err := iter.Next()
+		if err != nil {
+			if errors.Is(err, iterator.Done) {
+				break
+			} else {
+				return nil, err
+			}
+		}
+		var image entity.UserImage2 
+		if err := document.DataTo(&image); err != nil {
+			return nil, err
+		}
+		images = append(images, &usersimageResponse2{
+			id:          image.id,
+			ImageURL:    image.ImageURL,
+			vector:		 image.vector,
+			updatedAt:   image.updatedAt.Unix(),
+		})
+	}
+	return images, nil
+}
+
 func (app *App) makeQuery(r *http.Request) (*firestore.Query, error) {
 	values := r.URL.Query()
 	collection := app.fsClient.Collection(entity.KindNameImage)
@@ -427,8 +472,65 @@ func (app *App) makeQuery(r *http.Request) (*firestore.Query, error) {
 	return &query, nil
 }
 
-
 func (app *App) makeQuery_user(r *http.Request) (*firestore.Query, error) {
+	values := r.URL.Query()
+	collection := app.fsClient.Collection(entity.KindNameSelectImage)
+	query := collection.Query
+	if values.Get("count") != "" {
+		count, err := strconv.Atoi(values.Get("count"))
+		if err != nil {
+			return nil, err
+		}
+		query = query.Limit(count)
+	} else {
+		query = query.Limit(limit)
+	}
+	// `Order`
+	{
+		if values.Get("sort") != "" {
+			if path, ok := sortMap[values.Get("sort")]; ok {
+				reverse := values.Get("reverse") == "true"
+				if values.Get("order") == "desc" {
+					reverse = !reverse
+				}
+				if values.Get("id") != "" {
+					var op string
+					if reverse {
+						op = "<="
+					} else {
+						op = ">="
+					}
+					var image entity.Image
+					document, err := collection.Doc(values.Get("id")).Get(context.Background())
+					if err != nil {
+						return nil, err
+					}
+					if err := document.DataTo(&image); err != nil {
+						return nil, err
+					}
+					switch path {
+					case "ID":
+						query = query.Where(path, op, image.ID)
+					case "PublishedAt":
+						query = query.Where(path, op, image.PublishedAt)
+					case "UpdatedAt":
+						query = query.Where(path, op, image.UpdatedAt)
+					}
+				}
+				if reverse {
+					query = query.OrderBy(path, firestore.Desc)
+				} else {
+					query = query.OrderBy(path, firestore.Asc)
+				}
+			} else {
+				return nil, fmt.Errorf("invalid sort query: %v", values.Get("sort"))
+			}
+		}
+	}
+	return &query, nil
+}
+
+func (app *App) makeQuery_stylegan2(r *http.Request) (*firestore.Query, error) {
 	values := r.URL.Query()
 	collection := app.fsClient.Collection(entity.KindNameUserImage)
 	query := collection.Query
