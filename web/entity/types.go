@@ -67,10 +67,10 @@ type UserImage struct {
 	UpdatedAt   time.Time
 }
 type UserImage2 struct {
-	id          string
+	ID          string
 	ImageURL    string
-	vector      []float64
-	updatedAt   time.Time
+	Vector      []float64
+	UpdatedAt   time.Time
 }
 // Count type
 type Count struct {
