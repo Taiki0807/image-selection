@@ -11,6 +11,7 @@ const (
 	KindNameCount = "Count"
 	KindNameUser = "User"
 	KindNameUserImage = "usersimage"
+	KindNameSelectImage = "faceimage"
 )
 
 // Status values
@@ -64,6 +65,12 @@ type UserImage struct {
 	ImageURL    string
 	UID         string
 	UpdatedAt   time.Time
+}
+type UserImage2 struct {
+	id          string
+	ImageURL    string
+	vector      []float64
+	updatedAt   time.Time
 }
 // Count type
 type Count struct {

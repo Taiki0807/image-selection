@@ -20,6 +20,13 @@ type usersimageResponse struct {
 	UID         string `json:"uid"`
 	UpdatedAt   int64  `json:"updated_at"`
 }
+type usersimageResponse2 struct {
+	id          string `json:"id"`
+	ImageURL    string `json:"image_url"`
+	vector         string `json:"vector"`
+	updatedAt   int64  `json:"updated_at"`
+}
+
 
 type countResponse struct {
 	Size      string `json:"size"`
