@@ -1,4 +1,4 @@
-module github.com/sugyan/image-dataset/web
+module github.com/Taiki0807/image-selection/web
 
 go 1.13
 

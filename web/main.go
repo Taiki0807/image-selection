@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/sugyan/image-dataset/web/app"
+	"github.com/Taiki0807/image-selection/web/app"
 )
 
 func main() {
