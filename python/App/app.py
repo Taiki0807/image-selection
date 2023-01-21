@@ -234,10 +234,10 @@ async def get_face():
         print(blob.public_url)
         city_ref = db.collection('faceimage').document()
         city_ref.set({
-            'id':file_id,
+            'ID':file_id,
             'ImageURL': blob.public_url,
-            'vector':z[i].tolist(),
-            'updatedAt':datetime.datetime.now()
+            'Vector':z[i].tolist(),
+            'UpdatedAt':datetime.datetime.now()
         })
     return {"status": "ok"}
 

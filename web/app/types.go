@@ -21,10 +21,10 @@ type usersimageResponse struct {
 	UpdatedAt   int64  `json:"updated_at"`
 }
 type usersimageResponse2 struct {
-	id          string `json:"id"`
+	ID          string `json:"id"`
 	ImageURL    string `json:"image_url"`
-	vector         string `json:"vector"`
-	updatedAt   int64  `json:"updated_at"`
+	Vector      []float64 `json:"vector"`
+	UpdatedAt   int64  `json:"updated_at"`
 }
 
 

@@ -368,10 +368,10 @@ func (app *App) fetchusersImages_stylegan2(r *http.Request) ([]*usersimageRespon
 			return nil, err
 		}
 		images = append(images, &usersimageResponse2{
-			id:          image.id,
+			ID:          image.ID,
 			ImageURL:    image.ImageURL,
-			vector:		 image.vector,
-			updatedAt:   image.updatedAt.Unix(),
+			Vector:		 image.Vector,
+			UpdatedAt:   image.UpdatedAt.Unix(),
 		})
 	}
 	return images, nil
