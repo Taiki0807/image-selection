@@ -14,6 +14,14 @@ export interface ImageResponse {
 export interface UserImageResponse {
     id: string;
     image_url: string;
+    vectors: [];
+    updated_at: number;
     uid: string;
+}
+
+export interface UserImageResponse2 {
+    id: string;
+    image_url: string;
+    vector: Float64Array;
     updated_at: number;
 }
