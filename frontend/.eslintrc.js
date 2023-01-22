@@ -62,6 +62,7 @@ module.exports = {
         "@typescript-eslint/no-non-null-asserted-optional-chain": "off",
         "no-template-curly-in-string": "off",
         "react/jsx-key": "off",
+        "@typescript-eslint/no-array-constructor": "off",
         "@typescript-eslint/triple-slash-reference": [
             "error",
             {
