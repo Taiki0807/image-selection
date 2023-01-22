@@ -41,6 +41,11 @@ const Menu: React.FC = () => {
                         マッチング
                     </Link>
                 </ListItem>
+                <ListItem>
+                    <Link component={link} to="/chat">
+                        Chat
+                    </Link>
+                </ListItem>
             </List>
         </Container>
     );
