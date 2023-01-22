@@ -200,13 +200,6 @@ const Header: React.FC = () => {
                             Dataset
                         </Link>
                     </Typography>
-                    <Badge
-                        overlap="rectangular"
-                        badgeContent={4}
-                        color="secondary"
-                    >
-                        <MailIcon />
-                    </Badge>
                     <div className={classes.contents}>
                         {button}
                         {icon}
