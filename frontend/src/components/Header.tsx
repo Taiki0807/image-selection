@@ -197,7 +197,7 @@ const Header: React.FC = () => {
                 <Toolbar>
                     <Typography variant="h6" className={classes.title}>
                         <Link component={link} color="inherit">
-                            Dataset
+                            マッチングサイト
                         </Link>
                     </Typography>
                     <div className={classes.contents}>
