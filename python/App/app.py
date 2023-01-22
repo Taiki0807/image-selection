@@ -22,6 +22,8 @@ import datetime
 from typing import List
 import hashlib
 import uuid
+import random
+import json
 
 credFilePath = "ace-cycling-356912-d715a97c04be.json"
 cred = credentials.Certificate(credFilePath)
@@ -40,7 +42,7 @@ imgs = []
 detector = MTCNN()
 embedder = FaceNet()
 
-x_max = 1.03
+x_max = 2
 x_min = 0.04
 sc_max = 0
 sc_min = 100
@@ -76,7 +78,7 @@ async def get_health():
 async def update_face(u_id:str):
     num_layers = 18
     output_dir = 'results'
-    latent_seed = 954 
+    latent_seed = random.randint(0, 1000)
     truncation_psi = 0.5
     noise_seed = 500
     batch_size = 1
@@ -108,33 +110,34 @@ async def update_face(u_id:str):
     })
     return {"status": "ok","face_url":blob.public_url}
 
+
 @prefix_router.post("/make_face_v2/{u_id}")
-async def update_face(u_id:str,like:List,vectors:List):
+async def update_face(u_id:str):
     plus_vector = np.zeros((1,512))
     minus_vector = np.zeros((1,512))
+    city_ref = db.collection('likeimg').document(u_id)
+    docs = city_ref.get().to_dict()
+    print(docs)
+    for doc in docs:
+        if docs.get('Like') == '1':
+            plus_vector = np.concatenate([plus_vector, docs.get('Vector').reshape([1,512])],axis=0)
+
+        if docs.get('Like') == '3':
+            minus_vector = np.concatenate([minus_vector, docs.get('Vector').reshape([1,512])], axis=0)
     
     num_layers = 18
     output_dir = 'results'
-    latent_seed = 954 
+    latent_seed = random.randint(0, 1000) 
     truncation_psi = 0.5
     noise_seed = 500
     batch_size = 1
     nn.load_parameters("styleGAN2_G_params.h5")
 
     rnd = np.random.RandomState(latent_seed)
-    vectors = np.array(vectors)
-    for i in range(len(like)):
-        if liek[1] == 'plus':
-            plus_vector = np.concatenate([plus_vector, vectors[i].reshape([1,512])],axis=0)
-
-        if like[0] == 'minus':
-            minus_vector = np.concatenate([minus_vector, vectors[i].reshape([1,512])], axis=0)
-
     plus_vector_mean = np.mean(plus_vector, axis=0) # plus_vectorの平均をとる
     minus_vector_mean = np.mean(minus_vector, axis=0)  # minus_vectorの平均をとる
     vectors = rnd.randn(batch_size, 512)  # ランダムベクトル取得
     vectors = vectors + plus_vector_mean - minus_vector_mean  # ベクトルの補正
-
     nn.set_auto_forward(True) 
     style_noise = nn.NdArray.from_numpy_array(vectors)
     style_noises = [style_noise for _ in range(2)] 
@@ -144,7 +147,7 @@ async def update_face(u_id:str,like:List,vectors:List):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     # Display all the images
-    filename = f'results/{u_id}_likeface.png'
+    filename = f'results/{str(uuid.uuid4())}.png'
     imsave(filename, images[0],channel_first=True)
     blob = bucket.blob(filename)
     blob.upload_from_filename(filename)
@@ -194,19 +197,19 @@ def get_percentage(url_source:str,url_target:str):
     image2 = embeddings[1]
 
     result = calc_euclid_distance(image1, image2)
-    if result >= 0.04 and result <= 1.03:
+    print(result)
+    if result >= 0.04 and result <= 2:
         res = (result - x_min) / (x_max - x_min) * (sc_max - sc_min) + sc_min
     elif result < 0.04:
         res = 100
     elif result > 1.03:
         res = 0
-    print(result)
     return {"percentage": res}
 @prefix_router.post("/generate_face")
 async def get_face():
     num_layers = 18
     output_dir = 'results'
-    latent_seed = 954 
+    latent_seed = random.randint(0, 1000)
     truncation_psi = 0.5
     noise_seed = 500
     batch_size = 2
