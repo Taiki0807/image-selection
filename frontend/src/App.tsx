@@ -17,6 +17,7 @@ import Result_face from "./components/Result_face";
 import Matching from "./components/Matching";
 import Test from "./components/Test";
 import { LikeimageProvider } from "./context/LikeImage";
+import Chat from "./components/Chat";
 
 const App: React.FC = () => {
     return (
@@ -38,6 +39,7 @@ const App: React.FC = () => {
                         <Route path="/signup" element={<Signup />}></Route>
                         <Route path="/testapi" element={<Apitest />}></Route>
                         <Route path="/result" element={<Result_face />}></Route>
+                        <Route path="/chat" element={<Chat />}></Route>
                         <Route
                             path="/matching/:id"
                             element={<Matching />}
