@@ -17,6 +17,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+import "io/ioutil"
 
 type queryFilter struct {
 	path  string
@@ -32,6 +33,12 @@ type queryOrder struct {
 type query struct {
 	Filter []*queryFilter
 	Order  *queryOrder
+}
+// レスポンスJsonの定義
+type SampleResponse struct {
+	Status     string `json:"status"`
+	Message    string `json:"message"`
+	ReturnCode string `json:"returnCode"`
 }
 
 const limit = 30
@@ -87,7 +94,6 @@ type Data1 struct {
 	Title string `json:"title"`
 	Message string `json:"message"`
 }
-
 func (app *App) likeImageHandler(w http.ResponseWriter, r *http.Request) {
 	_,_, err := app.fsClient.Collection("users").Add(r.Context(),map[string]interface{}{
         "first": "Ada",
@@ -96,21 +102,25 @@ func (app *App) likeImageHandler(w http.ResponseWriter, r *http.Request) {
     })
 	if err != nil {
         log.Fatalf("Failed adding alovelace: %v", err)
-    }
+    }    
 	log.Printf("likeimage")
-	var data1 = Data1 {
-		ID:"1",
-		Title:"sample1",
-		Message: "hello",
-	}
+    // リターンコードの設定
+    returnCode := 200
+
+    // httpResponseの内容を設定
+    res := &SampleResponse{
+        Status:     "OK",
+        Message:    "ook",
+        ReturnCode: strconv.Itoa(returnCode),
+    }
     // レスポンスヘッダーの設定
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
     // ステータスコードを設定
-    w.WriteHeader(200)
+    w.WriteHeader(returnCode)
 
     // httpResponseの内容を書き込む
-    buf, _ := json.Marshal(data1)
+    buf, _ := json.MarshalIndent(res, "", "    ")
     _, _ = w.Write(buf)
 }
 // 構造を宣言
@@ -139,10 +149,100 @@ func (app *App) userImageHandler(w http.ResponseWriter, r *http.Request) {
 		"updatedAt": time.Now(),
     },firestore.MergeAll)
 	if err != nil {
-        log.Fatalf("Failed adding data: %v", err)
+        log.Fatalf("Failed adding data userImage: %v", err)
     }
 
 }
+// 構造を宣言
+type User_matching struct {
+    Uid string `json:"uid"`
+}
+// レスポンスJsonの定義
+type MatchingResponse struct {
+	Status     string `json:"status"`
+	Message    []string `json:"message"`
+	ReturnCode string `json:"returnCode"`
+}
+
+func (app *App) matchingHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("matching")
+	var user User_matching
+    json.NewDecoder(r.Body).Decode(&user)
+	doc, err := app.fsClient.Collection("matching").Doc(user.Uid).Get(r.Context())
+	if err != nil {
+		fmt.Printf("Failed to get doc matching: %v", err)
+		return
+	}
+	likeUsers := doc.Data()["matched"]
+	matching := []string{}
+	for _, likeUser := range likeUsers.([]interface{}) {
+		matching = append(matching, likeUser.(string))
+	}
+
+    // リターンコードの設定
+    returnCode := 200
+
+    // httpResponseの内容を設定
+    res := &MatchingResponse{
+        Status:     "OK",
+        Message:    matching,
+        ReturnCode: strconv.Itoa(returnCode),
+    }
+    // レスポンスヘッダーの設定
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+    // ステータスコードを設定
+    w.WriteHeader(returnCode)
+
+    // httpResponseの内容を書き込む
+    buf, _ := json.MarshalIndent(res, "", "    ")
+    _, _ = w.Write(buf)
+}
+// 構造を宣言
+type LikeStatus struct {
+    Uid string `json:"uid"`
+    Like  string    `json:"like"`
+	Vector  []float64    `json:"vector"`
+}
+func (app *App) userLikeHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("failed to read request body: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	fmt.Println(string(body))
+	fmt.Println("userimage ok")
+	var likestatus LikeStatus
+    json.NewDecoder(r.Body).Decode(&likestatus)
+	_,_, err = app.fsClient.Collection("users").Add(r.Context(),map[string]interface{}{
+        "Like": likestatus.Like,
+        "last":  "Lovelace",
+        "UpdatedAt":  time.Now(),
+    })
+	if err != nil {
+        log.Fatalf("Failed adding alovelace: %v", err)
+    }    
+	// リターンコードの設定
+    returnCode := 200
+
+    // httpResponseの内容を設定
+    res := &SampleResponse{
+        Status:     "OK",
+        Message:    "ook",
+        ReturnCode: strconv.Itoa(returnCode),
+    }
+    // レスポンスヘッダーの設定
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+    // ステータスコードを設定
+    w.WriteHeader(returnCode)
+
+    // httpResponseの内容を書き込む
+    buf, _ := json.MarshalIndent(res, "", "    ")
+    _, _ = w.Write(buf)
+}
+
 type Data_image struct {
 	Likeimageurl string `json:"url"`
 }
@@ -150,36 +250,36 @@ type Data_image struct {
 func (app *App) getlikeimageHandler(w http.ResponseWriter, r *http.Request) {
     r.ParseForm()
 	Uid := r.Form.Get("uid")
-	// データ読み取り
+	 // データ読み取り
 	ref, err := app.fsClient.Collection("users").Doc(Uid).Get(r.Context())
-	log.Printf(Uid)
 	if err != nil {
-        log.Fatalf("Failed adding data: %v", err)
-    }
-	log.Printf("likeimageurl")
-	url, err := ref.DataAt("likeface_url")
-	if err != nil {
-        log.Fatalf("Failed adding data: %v", err)
-    }
-	var data1 = Data_image {
-		Likeimageurl:url.(string),
+		log.Printf("Failed adding data getlikeimage: %v", err)
+	} else {
+		 // データが存在する場合の処理
+		url, err := ref.DataAt("likeface_url")
+		if err != nil {
+			log.Printf("Failed adding data getlikeimage: %v", err)
+		} else {
+			var data1 = Data_image {
+				Likeimageurl:url.(string),
+			}
+			 // レスポンスヘッダーの設定
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			 // ステータスコードを設定
+			w.WriteHeader(200)
+			 // httpResponseの内容を書き込む
+			buf, _ := json.Marshal(data1)
+			_, _ = w.Write(buf)
+		}
 	}
-    // レスポンスヘッダーの設定
-    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
-    // ステータスコードを設定
-    w.WriteHeader(200)
-
-    // httpResponseの内容を書き込む
-    buf, _ := json.Marshal(data1)
-    _, _ = w.Write(buf)
+	 // データが存在しない場合の処理
 }
 
 
 func (app *App) usersimageHandler(w http.ResponseWriter, r *http.Request) {
 	images, err := app.fetchusersImages(r)
 	if err != nil {
-		log.Printf("failed to fetch data: %s", err.Error())
+		log.Printf("failed to fetch data usersimageHandler: %s", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -191,6 +291,7 @@ func (app *App) usersimageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (app *App) selectimageHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("userimage ok")
 	images, err := app.fetchusersImages_stylegan2(r)
 	if err != nil {
 		log.Printf("failed to fetch data: %s", err.Error())
@@ -213,26 +314,55 @@ type matching struct {
 }
 var matchinguid []string
 var likeuser []string
+
 func (app *App) updatematching(w http.ResponseWriter, r *http.Request) {
-	log.Printf("updatemaching")
 	var data matching
     json.NewDecoder(r.Body).Decode(&data)
 	if(data.Status == 3){
 		newslice := append(likeuser,data.Touid)
 		likeuser = newslice
-		newslice = append(matchinguid,data.Touid)
-		matchinguid = newslice
+	
+		doc, err := app.fsClient.Collection("matching").Doc(data.Touid).Get(r.Context())
+		if err != nil {
+			fmt.Printf("Failed to get doc: %v", err)
+			return
+		}
+	
+		likeUsers := doc.Data()["likeuser"]
+		for i, v := range likeUsers.([]interface{}) {
+			fmt.Println(i, v.(string))
+		}
+		if likeUsers == nil {
+			fmt.Println("Document does not contain 'likeuser' field.")
+			return
+		}
+	
+		matching := []string{}
+		for _, likeUser := range likeUsers.([]interface{}) {
+			if likeUser == data.Touid {
+				matching = append(matching, likeUser.(string))
+			}
+		}
+		matchinguid = matching
+		fmt.Println(matchinguid)
+		_, err = app.fsClient.Collection("matching").Doc(data.Uid).Set(r.Context(),map[string]interface{}{
+			"likeuser":likeuser,
+			"matched":matchinguid,
+			"updatedAt": time.Now(),
+		})
+		if err != nil {
+			fmt.Printf("Failed to update: %v", err)
+			return
+		}
+		_, err = app.fsClient.Collection("matching").Doc(data.Touid).Update(r.Context(), []firestore.Update{{Path: "matched", Value: matchinguid}, {Path: "updatedAt", Value: time.Now()}})
+		if err != nil {
+			fmt.Printf("Failed to update: %v", err)
+			return
+		}
+
 	}else if(data.Status == 1){
 		return
 	}
-	_, err := app.fsClient.Collection("matching").Doc(data.Uid).Set(r.Context(),map[string]interface{}{
-        "likeuser":likeuser,
-		"matched":matchinguid,
-		"updatedAt": time.Now(),
-    })
-	if err != nil {
-        log.Fatalf("Failed adding data: %v", err)
-    }
 }
 
 
@@ -474,7 +604,7 @@ func (app *App) makeQuery(r *http.Request) (*firestore.Query, error) {
 
 func (app *App) makeQuery_user(r *http.Request) (*firestore.Query, error) {
 	values := r.URL.Query()
-	collection := app.fsClient.Collection(entity.KindNameSelectImage)
+	collection := app.fsClient.Collection(entity.KindNameUserImage)
 	query := collection.Query
 	if values.Get("count") != "" {
 		count, err := strconv.Atoi(values.Get("count"))
@@ -532,7 +662,7 @@ func (app *App) makeQuery_user(r *http.Request) (*firestore.Query, error) {
 
 func (app *App) makeQuery_stylegan2(r *http.Request) (*firestore.Query, error) {
 	values := r.URL.Query()
-	collection := app.fsClient.Collection(entity.KindNameUserImage)
+	collection := app.fsClient.Collection(entity.KindNameSelectImage)
 	query := collection.Query
 	if values.Get("count") != "" {
 		count, err := strconv.Atoi(values.Get("count"))
