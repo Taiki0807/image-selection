@@ -21,6 +21,7 @@
         "dotenv": "^16.0.3",
         "eslint-config-airbnb": "^19.0.4",
         "firebase": "^9.12.1",
+        "firebase-admin": "^11.5.0",
         "http-proxy-middleware": "^2.0.6",
         "leaflet": "^1.7.0",
         "leaflet-draw": "^1.0.4",
