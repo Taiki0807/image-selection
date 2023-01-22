@@ -16,6 +16,5 @@
         "jsx": "preserve",
         "useUnknownInCatchVariables": false
     },
-    "include": ["src"],
-    "include": ["./react-chat-engine.d.ts"]
+    "include": ["src/**/*", "./types/chat-engine.d.ts"]
 }
