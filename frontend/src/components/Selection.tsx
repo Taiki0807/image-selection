@@ -20,13 +20,17 @@ import {
     IconButton,
 } from "@material-ui/core";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
-import { ArrowBack, ArrowForward } from "@material-ui/icons";
+import {
+    ArrowBack,
+    ArrowForward,
+    VerticalAlignTopSharp,
+} from "@material-ui/icons";
 import CloseIcon from "@material-ui/icons/Close";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import H from "history";
 import { useAuthContext } from "../context/AuthContext";
 
-import { ImageResponse } from "../common/interfaces";
+import { UserImageResponse2 } from "../common/interfaces";
 const useStyles = makeStyles({
     tableCell: {
         width: "80%",
@@ -44,10 +48,10 @@ const useStyles = makeStyles({
     },
 });
 
-const Canvas: React.FC<{ size: number; image: ImageResponse | undefined }> = ({
-    size,
-    image,
-}) => {
+const Canvas: React.FC<{
+    size: number;
+    image: UserImageResponse2 | undefined;
+}> = ({ size, image }) => {
     const canvas = useRef<HTMLCanvasElement>(null);
     if (image != null && canvas.current != null) {
         const ctx = canvas.current.getContext("2d")!;
@@ -72,7 +76,7 @@ const Selection: React.FC = () => {
     const matches = useMediaQuery(theme.breakpoints.up("sm"));
     const history = useNavigate();
     const location = useLocation();
-    const [images, setImages] = useState<ImageResponse[]>([]);
+    const [images, setImages] = useState<UserImageResponse2[]>([]);
     const last = useRef<string>();
     const [index, setIndex] = useState(0);
     const params = new URLSearchParams(location.search);
@@ -80,16 +84,17 @@ const Selection: React.FC = () => {
     const [order, setOrder] = useState<string>(params.get("order") || "asc");
     const param = useParams<{ id: string }>();
     const { user } = useAuthContext();
+
     const loadImages = (
         history: NavigateFunction,
         location: H.Location,
-        images: ImageResponse[]
+        images: UserImageResponse2[]
     ) => {
         params.set("count", "100");
         if (last.current) {
             params.set("id", last.current);
         }
-        fetch(`/api/images?${params}`)
+        fetch(`/api/select_images?${params}`)
             .then((res: Response) => {
                 if (res.ok) {
                     return res.json();
@@ -100,17 +105,17 @@ const Selection: React.FC = () => {
                 }
                 throw new Error(res.statusText);
             })
-            .then((data: ImageResponse[]) => {
+            .then((data: UserImageResponse2[]) => {
                 if (data.length === 0) {
                     return;
                 }
                 last.current = data[data.length - 1].id;
                 const ids = new Set(
-                    images.map((value: ImageResponse) => value.id)
+                    images.map((value: UserImageResponse2) => value.id)
                 );
                 setImages(
                     images.concat(
-                        data.filter((value: ImageResponse) => {
+                        data.filter((value: UserImageResponse2) => {
                             return !ids.has(value.id);
                         })
                     )
@@ -160,15 +165,8 @@ const Selection: React.FC = () => {
         }
     }, [sort, order, history, location]);
     useEffect(() => {
-        console.log(index);
         if (index < images.length && index >= 0) {
-            history(
-                {
-                    pathname: `/matching/${index}`,
-                    search: location.search,
-                },
-                { replace: true }
-            );
+            history(`/selection/${index}`);
         }
         loadImages(history, location, images);
     }, [index]);
@@ -179,27 +177,21 @@ const Selection: React.FC = () => {
     const prevImage = () => {
         setIndex(index - 1);
     };
-    const handlers = {
-        NEXT_IMAGE: nextImage,
-        PREV_IMAGE: prevImage,
-        STATUS_1: async () => await updateStatus(1),
-        STATUS_2: async () => await updateStatus(2),
-        STATUS_3: async () => await updateStatus(3),
-    };
-
-    const current = (index: any): ImageResponse => {
+    const current = (index: any): UserImageResponse2 => {
         return images[index];
     };
-    const updateStatus = async (status: number) => {
-        const res: Response = await fetch(`/api/userimage`, {
+    const updateStatus = async (status: string) => {
+        console.log("hhello");
+        const res: Response = await fetch(`/api/userlikestatus`, {
             method: "POST",
             headers: {
+                "Access-Control-Allow-Origin": "*",
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 uid: user?.uid,
-                image_url: current(index).image_url,
-                status: status,
+                like: status,
+                vector: current(index).vector,
             }),
         });
         if (res.ok) {
@@ -207,6 +199,24 @@ const Selection: React.FC = () => {
         } else {
             console.error(res.status);
         }
+
+        nextImage();
+    };
+    const handlegenerate_face = () => {
+        fetch(`/fastapi/make_face_v2/${user?.uid}`, {
+            method: "POST",
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                u_id: user?.uid,
+            }),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data);
+            });
     };
 
     const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
@@ -246,13 +256,13 @@ const Selection: React.FC = () => {
                             <IconButton
                                 className={classes.swipeButtons__left}
                                 color="primary"
-                                onClick={async () => await updateStatus(1)}
+                                onClick={async () => await updateStatus("1")}
                             >
                                 <CloseIcon fontSize="large" />
                             </IconButton>
                             <IconButton
                                 className={classes.swipeButtons__right}
-                                onClick={async () => await updateStatus(3)}
+                                onClick={async () => await updateStatus("3")}
                             >
                                 <FavoriteIcon fontSize="large" />
                             </IconButton>
@@ -265,6 +275,13 @@ const Selection: React.FC = () => {
                     </Grid>
                 </Grid>
             </Grid>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={handlegenerate_face}
+            >
+                好みの顔生成
+            </Button>
         </Container>
     );
 };
