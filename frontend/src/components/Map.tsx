@@ -9,7 +9,7 @@ const Map = () => {
     const [item, setItem] = useState(Datos);
 
     const defaultCenter: any = [-12.069475, -77.022161];
-    const defaultZoom = 8;
+    const defaultZoom = 5;
     return (
         <MapContainer
             center={defaultCenter}
@@ -33,7 +33,6 @@ const Map = () => {
                             html: `
                             <div class='marker-pin'>
                             <img src=${img} />
-                            </div>
                             </div>
                             `,
                             iconSize: [30, 42],
