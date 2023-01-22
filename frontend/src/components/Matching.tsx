@@ -202,6 +202,8 @@ const Matching: React.FC = () => {
         if (images.length !== 0 && likeimage !== "") {
             score();
         }
+        setPosts([]);
+        loadImages(history, location, images);
     }, [index]);
 
     const nextImage = () => {
